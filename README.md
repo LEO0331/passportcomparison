@@ -45,3 +45,19 @@ This toolbox focuses on a clean, fast, and intuitive interface to compare visa-f
     ```bash
     flutter run -d chrome
 
+## 📺 Demonstration
+
+### 1. Comparison Flow
+Select up to 5 countries and specific years. The tool instantly fetches the Rank and Visa-Free Score. Click **"Details"** to see a full country-by-country access breakdown.
+> ![Comparison Demo1](assets/screenshots/demo1.png)
+> ![Comparison Demo2](assets/screenshots/demo2.png)
+
+### 2. Favorites & Snapshots
+Save frequent comparisons with custom names. 
+> ![Favorites Demo1](assets/screenshots/demo3.png)
+
+### 3. Professional PDF Export (Full vs. Diff Only)
+Choose between a **Full Report** or a **Difference-Only Report**. The "Diff Only" mode is perfect for travelers who only want to know which destinations require a visa for one passport but not the other.
+> ![PDF Export Demo1](assets/screenshots/pdf1.pdf)
+> ![PDF Export Demo2](assets/screenshots/pdf2.pdf)
+
