@@ -7,11 +7,13 @@ import 'package:logger/logger.dart';
 class ApiService {
   static const String baseUrl = "https://api.henleypassportindex.com/api/v3";
   final _logger = Logger();
+  final http.Client client; 
+  ApiService({http.Client? client}) : client = client ?? http.Client(); 
   // 獲取所有國家清單 (一進入頁面就呼叫)
   Future<List<Country>> fetchCountries() async {
     final prefs = await SharedPreferences.getInstance();
     try {
-      final response = await http.get(Uri.parse('$baseUrl/countries'));
+      final response = await client.get(Uri.parse('$baseUrl/countries'));
       if (response.statusCode == 200) {
         await prefs.setString('cached_countries', response.body);
         final List<dynamic> data = json.decode(response.body)['countries']; 
