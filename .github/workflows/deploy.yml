@@ -18,14 +18,14 @@ jobs:
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-          flutter-version: '3.19.0' # 建議填入你目前的 Flutter 版本
+          flutter-version: '3.11.0' # 建議填入你目前的 Flutter 版本
 
       - name: Install dependencies
         run: flutter pub get
 
       - name: Build Web
         # 關鍵：將 <YOUR_REPO_NAME> 替換成你的 GitHub 倉庫名稱
-        run: flutter build web --release --base-href "/<YOUR_REPO_NAME>/"
+        run: flutter build web --release --base-href "/passportcomparison/"
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
