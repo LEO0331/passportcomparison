@@ -3,7 +3,7 @@ name: Deploy Flutter Web
 on:
   push:
     branches:
-      - main  # 當你推送到 main 分支時觸發
+      - main  # 確保你的主分支名稱是 main
 
 permissions:
   contents: write
@@ -14,17 +14,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Flutter
+      - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          channel: 'stable'
-          flutter-version: '3.11.0' # 建議填入你目前的 Flutter 版本
+          # 解決 SDK ^3.11.0 要求：使用最新穩定版或開發版
+          channel: 'stable' 
 
       - name: Install dependencies
         run: flutter pub get
 
       - name: Build Web
-        # 關鍵：將 <YOUR_REPO_NAME> 替換成你的 GitHub 倉庫名稱
+        # 關鍵：將 <passportcomparison> 替換為你的 GitHub 倉庫名稱 (Repository Name)
+        # 例如：https://github.com -> base-href 就要設為 "/my_app/"
         run: flutter build web --release --base-href "/passportcomparison/"
 
       - name: Deploy to GitHub Pages
