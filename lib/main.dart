@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:passportcomparison/widgets/openness_indicator.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:pdf/pdf.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'models/country.dart';
@@ -15,12 +16,17 @@ import 'package:logger/logger.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:share_plus/share_plus.dart';
+ThemeMode _themeMode = ThemeMode.system;
 void main() {
   runApp(MaterialApp(
     home: PassportComparePage(),
     debugShowCheckedModeBanner: false,
-    themeMode: ThemeMode.system,
-    theme: ThemeData(useMaterial3: true, colorSchemeSeed: Colors.blueGrey),
+    themeMode: _themeMode,
+    theme: ThemeData(
+      useMaterial3: true, 
+      colorSchemeSeed: Colors.blueGrey,
+      brightness: Brightness.light,
+    ),    
     darkTheme: ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
@@ -37,6 +43,7 @@ class PassportComparePage extends StatefulWidget {
 }
 
 class _PassportComparePageState extends State<PassportComparePage> {
+  ThemeMode _themeMode = ThemeMode.system; // 預設跟隨系統
   final ApiService _apiService = ApiService();
   final _logger = Logger();
   static final String currentYear = DateTime.now().year.toString();
@@ -80,17 +87,89 @@ class _PassportComparePageState extends State<PassportComparePage> {
   }
   // --- 導出 PDF ---
   Future<void> _exportToPdf() async {
-    final pdf = pw.Document();
-    pdf.addPage(
-      pw.Page(
-        build: (pw.Context context) => pw.Center(
-          child: pw.Text("Passport Comparison Report", style: pw.TextStyle(fontSize: 24)),
-          // 這裡可以根據資料生成 PDF 表格，或將截圖放入 PDF
+  final pdf = pw.Document();
+  
+  // 1. 載入支援中文的字體 (Chrome Web 必備，否則中文會亂碼)
+  final font = await PdfGoogleFonts.notoSansTCRegular();
+  final boldFont = await PdfGoogleFonts.notoSansTCBold();
+
+  // 2. 準備要顯示的國家代碼
+  final activeCodes = selectedCountryCodes.take(passportCount).whereType<String>().toList();
+
+  pdf.addPage(
+    pw.MultiPage( // 使用 MultiPage 以防內容過長自動分頁
+      pageFormat: PdfPageFormat.a4,
+      build: (pw.Context context) => [
+        // 標題
+        pw.Header(
+          level: 0,
+          child: pw.Text("Passport Comparison Report", 
+            style: pw.TextStyle(font: boldFont, fontSize: 24, color: PdfColors.blueGrey800)),
         ),
-      ),
-    );
-    await Printing.layoutPdf(onLayout: (format) => pdf.save());
-  }
+        pw.SizedBox(height: 10),
+        pw.Text("Generated on: ${DateTime.now().toString().substring(0, 16)}", 
+          style: pw.TextStyle(font: font, fontSize: 10, color: PdfColors.grey700)),
+        pw.SizedBox(height: 20),
+
+        // --- 第一部分：摘要表格 (Summary Table) ---
+        pw.Text("Summary", style: pw.TextStyle(font: boldFont, fontSize: 16)),
+        pw.SizedBox(height: 10),
+        pw.TableHelper.fromTextArray(
+          headers: ['Country', 'Year', 'Rank', 'Visa-Free'],
+          headerStyle: pw.TextStyle(font: boldFont, color: PdfColors.white),
+          headerDecoration: const pw.BoxDecoration(color: PdfColors.blueGrey),
+          cellStyle: pw.TextStyle(font: font),
+          data: activeCodes.map((code) {
+            final country = allCountries.firstWhere((c) => c.code == code);
+            final year = selectedYears[activeCodes.indexOf(code)];
+            final stats = country.yearlyData?[year];
+            return [
+              country.name,
+              year,
+              "#${stats?['rank'] ?? 'N/A'}",
+              stats?['total']?.toString() ?? '0',
+            ];
+          }).toList(),
+        ),
+        
+        pw.SizedBox(height: 30),
+
+        // --- 第二部分：詳細准入清單 (Detailed Access) ---
+        pw.Text("Detailed Access Comparison", style: pw.TextStyle(font: boldFont, fontSize: 16)),
+        pw.SizedBox(height: 10),
+        pw.TableHelper.fromTextArray(
+          headers: ['Destination', ...activeCodes],
+          headerStyle: pw.TextStyle(font: boldFont, color: PdfColors.white),
+          headerDecoration: const pw.BoxDecoration(color: PdfColors.blueGrey700),
+          cellStyle: pw.TextStyle(font: font, fontSize: 9),
+          // 這裡篩選出一些代表性的國家或全部國家進行比對
+          data: allCountries.take(200).map((dest) { 
+            return [
+              dest.name,
+              ...activeCodes.map((sourceCode) {
+                // 檢查 visaFreeMap 中是否有該國家的免簽清單
+                final isVisaFree = visaFreeMap[sourceCode]?.contains(dest.code) ?? false;
+                return isVisaFree ? "V" : "X";
+              }),
+            ];
+          }).toList(),
+        ),
+
+        pw.Padding(
+          padding: const pw.EdgeInsets.only(top: 20),
+          child: pw.Text("Note: 'V' indicates Visa-Free or Visa on Arrival or Visa Online access.", 
+            style: pw.TextStyle(font: font, fontSize: 8, color: PdfColors.grey600)),
+        ),
+      ],
+    ),
+  );
+
+  // 3. 在 Chrome 中開啟列印/儲存視窗
+  await Printing.layoutPdf(
+    onLayout: (PdfPageFormat format) async => pdf.save(),
+    name: 'Passport_Comparison_${DateTime.now().millisecondsSinceEpoch}.pdf',
+  );
+}
 // 在 initState 中自動載入舊紀錄
 @override
 void initState() {
@@ -350,6 +429,18 @@ Future<void> _onAddToFavorite() async {
           title: Text(_selectedIndex == 0 ? "Passport Comparison" : "My Favorites"),
           backgroundColor: const Color(0xFF455A64),
           foregroundColor: Colors.white,
+          actions: [
+            IconButton(
+              icon: Icon(_themeMode == ThemeMode.dark ? Icons.light_mode : Icons.dark_mode),
+              tooltip: "switch modes",
+              onPressed: () {
+                setState(() {
+                  _themeMode = _themeMode == ThemeMode.dark ? ThemeMode.light : ThemeMode.dark;
+                });
+              },
+            ),
+            const SizedBox(width: 8), 
+          ],
         ),   
         drawer: Drawer(
         child: Column(
@@ -488,7 +579,7 @@ Future<void> _onAddToFavorite() async {
                   ),
                   const SizedBox(width: 10),
                   IconButton(
-                    onPressed: showDetails ? _exportToPdf : null,
+                    onPressed: isComparing ? _exportToPdf : null,
                     icon: const Icon(Icons.picture_as_pdf_outlined),
                     tooltip: "Export PDF",
                   ),
