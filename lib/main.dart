@@ -86,88 +86,87 @@ class _PassportComparePageState extends State<PassportComparePage> {
     }
   }
   // --- 導出 PDF ---
-  Future<void> _exportToPdf() async {
+  Future<void> _exportToPdf({bool diffOnly = false}) async {
   final pdf = pw.Document();
-  
-  // 1. 載入支援中文的字體 (Chrome Web 必備，否則中文會亂碼)
   final font = await PdfGoogleFonts.notoSansTCRegular();
   final boldFont = await PdfGoogleFonts.notoSansTCBold();
 
-  // 2. 準備要顯示的國家代碼
   final activeCodes = selectedCountryCodes.take(passportCount).whereType<String>().toList();
 
+  // --- 關鍵：過濾資料邏輯 ---
+  // 我們只針對 Detailed Access 進行過濾
+  final List<List<String>> tableData = [];
+  
+  for (var dest in allCountries) {
+    // 取得每個選定國家對該目的地(dest)的簽證狀態 (true/false)
+    List<bool> statuses = activeCodes.map((sourceCode) {
+      return visaFreeMap[sourceCode]?.contains(dest.code) ?? false;
+    }).toList();
+
+    // 判斷是否「全等」：如果所有狀態都一樣，代表沒有差異
+    bool allSame = statuses.every((s) => s == statuses.first);
+
+    // 如果 diffOnly 為 true，且全等，就跳過這一個國家
+    if (diffOnly && allSame) continue;
+
+    // 否則，將這行加入表格
+    tableData.add([
+      dest.name,
+      ...statuses.map((isVisaFree) => isVisaFree ? "V" : "X"),
+    ]);
+  }
+
   pdf.addPage(
-    pw.MultiPage( // 使用 MultiPage 以防內容過長自動分頁
+    pw.MultiPage(
       pageFormat: PdfPageFormat.a4,
       build: (pw.Context context) => [
-        // 標題
         pw.Header(
           level: 0,
-          child: pw.Text("Passport Comparison Report", 
-            style: pw.TextStyle(font: boldFont, fontSize: 24, color: PdfColors.blueGrey800)),
+          child: pw.Text(diffOnly ? "Passport Comparison (Differences Only)" : "Full Passport Comparison Report", 
+            style: pw.TextStyle(font: boldFont, fontSize: 22)),
         ),
         pw.SizedBox(height: 10),
-        pw.Text("Generated on: ${DateTime.now().toString().substring(0, 16)}", 
-          style: pw.TextStyle(font: font, fontSize: 10, color: PdfColors.grey700)),
-        pw.SizedBox(height: 20),
-
-        // --- 第一部分：摘要表格 (Summary Table) ---
-        pw.Text("Summary", style: pw.TextStyle(font: boldFont, fontSize: 16)),
-        pw.SizedBox(height: 10),
-        pw.TableHelper.fromTextArray(
-          headers: ['Country', 'Year', 'Rank', 'Visa-Free'],
-          headerStyle: pw.TextStyle(font: boldFont, color: PdfColors.white),
-          headerDecoration: const pw.BoxDecoration(color: PdfColors.blueGrey),
-          cellStyle: pw.TextStyle(font: font),
-          data: activeCodes.map((code) {
-            final country = allCountries.firstWhere((c) => c.code == code);
-            final year = selectedYears[activeCodes.indexOf(code)];
-            final stats = country.yearlyData?[year];
-            return [
-              country.name,
-              year,
-              "#${stats?['rank'] ?? 'N/A'}",
-              stats?['total']?.toString() ?? '0',
-            ];
-          }).toList(),
-        ),
         
-        pw.SizedBox(height: 30),
-
-        // --- 第二部分：詳細准入清單 (Detailed Access) ---
-        pw.Text("Detailed Access Comparison", style: pw.TextStyle(font: boldFont, fontSize: 16)),
+        // 1. Summary Section (保持顯示所有選定國家)
+        pw.Text("Selected Passports", style: pw.TextStyle(font: boldFont, fontSize: 14)),
         pw.SizedBox(height: 10),
         pw.TableHelper.fromTextArray(
-          headers: ['Destination', ...activeCodes],
+          headers: ['Country', 'Year', 'Rank', 'Total'],
           headerStyle: pw.TextStyle(font: boldFont, color: PdfColors.white),
           headerDecoration: const pw.BoxDecoration(color: PdfColors.blueGrey700),
-          cellStyle: pw.TextStyle(font: font, fontSize: 9),
-          // 這裡篩選出一些代表性的國家或全部國家進行比對
-          data: allCountries.take(200).map((dest) { 
-            return [
-              dest.name,
-              ...activeCodes.map((sourceCode) {
-                // 檢查 visaFreeMap 中是否有該國家的免簽清單
-                final isVisaFree = visaFreeMap[sourceCode]?.contains(dest.code) ?? false;
-                return isVisaFree ? "V" : "X";
-              }),
-            ];
+          cellStyle: pw.TextStyle(font: font, fontSize: 10),
+          data: activeCodes.asMap().entries.map((e) {
+            final country = allCountries.firstWhere((c) => c.code == e.value);
+            final stats = country.yearlyData?[selectedYears[e.key]];
+            return [country.name, selectedYears[e.key], "#${stats?['rank'] ?? 'N/A'}", stats?['total']?.toString() ?? '0'];
           }).toList(),
         ),
 
-        pw.Padding(
-          padding: const pw.EdgeInsets.only(top: 20),
-          child: pw.Text("Note: 'V' indicates Visa-Free or Visa on Arrival or Visa Online access.", 
-            style: pw.TextStyle(font: font, fontSize: 8, color: PdfColors.grey600)),
-        ),
+        pw.SizedBox(height: 25),
+
+        // 2. Detailed Diff Section
+        pw.Text(diffOnly ? "Visa Access Differences" : "All Destination Access", 
+          style: pw.TextStyle(font: boldFont, fontSize: 14)),
+        pw.SizedBox(height: 10),
+        
+        if (tableData.isEmpty)
+          pw.Center(child: pw.Text("No differences found between selected passports.", style: pw.TextStyle(font: font)))
+        else
+          pw.TableHelper.fromTextArray(
+            headers: ['Destination', ...activeCodes],
+            headerStyle: pw.TextStyle(font: boldFont, color: PdfColors.white, fontSize: 9),
+            headerDecoration: const pw.BoxDecoration(color: PdfColors.blueGrey900),
+            cellStyle: pw.TextStyle(font: font, fontSize: 8),
+            cellAlignment: pw.Alignment.centerLeft,
+            data: tableData,
+          ),
       ],
     ),
   );
 
-  // 3. 在 Chrome 中開啟列印/儲存視窗
   await Printing.layoutPdf(
-    onLayout: (PdfPageFormat format) async => pdf.save(),
-    name: 'Passport_Comparison_${DateTime.now().millisecondsSinceEpoch}.pdf',
+    onLayout: (format) async => pdf.save(),
+    name: 'passport_diff_report.pdf',
   );
 }
 // 在 initState 中自動載入舊紀錄
@@ -579,14 +578,21 @@ Future<void> _onAddToFavorite() async {
                   ),
                   const SizedBox(width: 10),
                   IconButton(
-                    onPressed: isComparing ? _exportToPdf : null,
+                    onPressed: isComparing ? () => _exportToPdf(diffOnly: false) : null,
                     icon: const Icon(Icons.picture_as_pdf_outlined),
-                    tooltip: "Export PDF",
+                    tooltip: "Export Full PDF",
                   ),
+                  const SizedBox(width: 10),
+                  // --- 僅差異 PDF 導出 (新加入) ---
+                  IconButton.filled(
+                    onPressed: isComparing ? () => _exportToPdf(diffOnly: true) : null,
+                    icon: const Icon(Icons.difference_outlined),
+                    style: IconButton.styleFrom(backgroundColor: Colors.teal.shade400),
+                    tooltip: "Export Differences Only PDF",
+                  ),    
                 ],
               ),
             ],
-
             // 步驟 4: 顯示摘要結果 (Rank, Visa Free Count)
             if (isComparing) ...[
               const SizedBox(height: 20),
