@@ -33,7 +33,12 @@ class ApiService {
   }
 
   // 獲取特定國家的詳細准入代碼 (按下 Details 時呼叫)
+  final Map<String, Set<String>> _cache = {};
   Future<Set<String>> fetchVisaFreeCodes(String countryCode) async {
+    if (_cache.containsKey(countryCode)) {
+      _logger.i("Returning cached data for: $countryCode");
+      return _cache[countryCode]!;
+    }
     try {
       final response = await http.get(
         Uri.parse('$baseUrl/visa-single/$countryCode'),
@@ -53,6 +58,7 @@ class ApiService {
             }
           }
         }
+        _cache[countryCode] = codes;
         return codes;
       }
     } catch (e, stackTrace) {
