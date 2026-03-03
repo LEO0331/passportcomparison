@@ -35,7 +35,7 @@ class _ComparisonTableState extends State<ComparisonTable> {
 
     // 2. 處理過濾邏輯
     Iterable<Country> filtered = widget.allCountries.where(
-      (c) => c.name.toLowerCase().contains(_searchQuery.toLowerCase())
+      (c) => c.name.toLowerCase().contains(_searchQuery.toLowerCase()),
     );
 
     // 如果開啟「僅顯示差異」，且比對對象超過一個
@@ -43,7 +43,8 @@ class _ComparisonTableState extends State<ComparisonTable> {
       filtered = filtered.where((target) {
         final statuses = activePassports.map((p) {
           // 檢查該目的地是否在該護照的免簽清單中
-          return (p.code == target.code) || (widget.visaFreeMap[p.code]?.contains(target.code) ?? false);
+          return (p.code == target.code) ||
+              (widget.visaFreeMap[p.code]?.contains(target.code) ?? false);
         }).toSet();
         return statuses.length > 1; // 如果 Set 長度 > 1，代表結果有異
       });
@@ -67,8 +68,9 @@ class _ComparisonTableState extends State<ComparisonTable> {
                     prefixIcon: const Icon(Icons.search, size: 20),
                     isDense: true,
                     filled: true,
-                    fillColor: Theme.of(context).brightness == Brightness.dark 
-                        ? Colors.white10 : Colors.grey.shade100,
+                    fillColor: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white10
+                        : Colors.grey.shade100,
                     border: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(30),
                       borderSide: BorderSide.none,
@@ -104,7 +106,10 @@ class _ComparisonTableState extends State<ComparisonTable> {
                     // 目的地國家名稱
                     Padding(
                       padding: const EdgeInsets.all(10),
-                      child: Text(target.name, style: const TextStyle(fontSize: 12)),
+                      child: Text(
+                        target.name,
+                        style: const TextStyle(fontSize: 12),
+                      ),
                     ),
                     // 各護照對應的准入狀態
                     ...activePassports.map((passport) {
@@ -143,26 +148,33 @@ class _ComparisonTableState extends State<ComparisonTable> {
             children: [
               const Padding(
                 padding: EdgeInsets.symmetric(vertical: 14, horizontal: 8),
-                child: Text("Destination", 
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12)),
-              ),
-              ...passports.map((p) => Padding(
-                padding: const EdgeInsets.symmetric(vertical: 6),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    CountryFlag.fromCountryCode(p.code.toUpperCase()),
-                    const SizedBox(height: 4),
-                    Text(
-                      p.name, 
-                      textAlign: TextAlign.center, 
-                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 9),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
+                child: Text(
+                  "Destination",
+                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
                 ),
-              )),
+              ),
+              ...passports.map(
+                (p) => Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 6),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      CountryFlag.fromCountryCode(p.code.toUpperCase()),
+                      const SizedBox(height: 4),
+                      Text(
+                        p.name,
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 9,
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ],
           ),
         ],
@@ -178,7 +190,7 @@ class _ComparisonTableState extends State<ComparisonTable> {
     //     height: 40,
     //     color: Colors.blue.withValues(),
     //     alignment: Alignment.center,
-    //     child: const Text("Home", 
+    //     child: const Text("Home",
     //       style: TextStyle(color: Colors.blue, fontSize: 9, fontWeight: FontWeight.bold)),
     //   );
     // }
@@ -189,12 +201,17 @@ class _ComparisonTableState extends State<ComparisonTable> {
         height: 40,
         color: Colors.grey.withValues(),
         alignment: Alignment.center,
-        child: const Text("N/A", style: TextStyle(color: Colors.grey, fontSize: 10)),
+        child: const Text(
+          "N/A",
+          style: TextStyle(color: Colors.grey, fontSize: 10),
+        ),
       );
     }
 
     // 3. 正常簽證狀態判斷
-    bool isFree = (passport.code == target.code) || (widget.visaFreeMap[passport.code]?.contains(target.code) ?? false);
+    bool isFree =
+        (passport.code == target.code) ||
+        (widget.visaFreeMap[passport.code]?.contains(target.code) ?? false);
     return Container(
       height: 40,
       alignment: Alignment.center,
