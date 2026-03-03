@@ -34,11 +34,16 @@ class _PassportFilterState extends State<PassportFilter> {
         ? widget.allCountries.firstWhere((c) => c.code == widget.selectedCode)
         : null;
 
-    final List<String> regions = ["All", ...widget.allCountries.map((e) => e.region).toSet()];
+    final List<String> regions = [
+      "All",
+      ...widget.allCountries.map((e) => e.region).toSet(),
+    ];
 
     final List<Country> filteredCountries = _selectedRegion == "All"
         ? widget.allCountries
-        : widget.allCountries.where((c) => c.region == _selectedRegion).toList();
+        : widget.allCountries
+              .where((c) => c.region == _selectedRegion)
+              .toList();
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -47,7 +52,9 @@ class _PassportFilterState extends State<PassportFilter> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: Colors.grey.shade200),
-        boxShadow: [BoxShadow(color: Colors.black.withValues(), blurRadius: 10)],
+        boxShadow: [
+          BoxShadow(color: Colors.black.withValues(), blurRadius: 10),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -59,8 +66,13 @@ class _PassportFilterState extends State<PassportFilter> {
                 flex: 2,
                 child: DropdownButtonFormField<String>(
                   initialValue: _selectedRegion,
-                  decoration: const InputDecoration(labelText: "Region", border: OutlineInputBorder()),
-                  items: regions.map((r) => DropdownMenuItem(value: r, child: Text(r))).toList(),
+                  decoration: const InputDecoration(
+                    labelText: "Region",
+                    border: OutlineInputBorder(),
+                  ),
+                  items: regions
+                      .map((r) => DropdownMenuItem(value: r, child: Text(r)))
+                      .toList(),
                   onChanged: (reg) => setState(() => _selectedRegion = reg!),
                 ),
               ),
@@ -69,8 +81,13 @@ class _PassportFilterState extends State<PassportFilter> {
                 flex: 1,
                 child: DropdownButtonFormField<String>(
                   initialValue: widget.selectedYear,
-                  decoration: const InputDecoration(labelText: "Year", border: OutlineInputBorder()),
-                  items: ["2024", "2023", "2022"].map((y) => DropdownMenuItem(value: y, child: Text(y))).toList(),
+                  decoration: const InputDecoration(
+                    labelText: "Year",
+                    border: OutlineInputBorder(),
+                  ),
+                  items: ["2024", "2023", "2022"]
+                      .map((y) => DropdownMenuItem(value: y, child: Text(y)))
+                      .toList(),
                   onChanged: widget.onYearChanged,
                 ),
               ),
@@ -88,10 +105,14 @@ class _PassportFilterState extends State<PassportFilter> {
             child: DropdownButton2<String>(
               isExpanded: true,
               hint: const Text("Search and Select Country"),
-              items: filteredCountries.map((c) => DropdownMenuItem<String>(
-                value: c.code,
-                child: Text(c.name),
-              )).toList(),
+              items: filteredCountries
+                  .map(
+                    (c) => DropdownMenuItem<String>(
+                      value: c.code,
+                      child: Text(c.name),
+                    ),
+                  )
+                  .toList(),
               value: widget.selectedCode,
               onChanged: widget.onCountryChanged,
               buttonStyleData: ButtonStyleData(
@@ -113,16 +134,25 @@ class _PassportFilterState extends State<PassportFilter> {
                     controller: _searchController,
                     decoration: const InputDecoration(
                       isDense: true,
-                      contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      contentPadding: EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 8,
+                      ),
                       hintText: 'Search country name...',
-                      border: OutlineInputBorder(borderRadius: BorderRadius.all(Radius.circular(8))),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.all(Radius.circular(8)),
+                      ),
                     ),
                   ),
                 ),
                 searchMatchFn: (item, searchValue) {
                   // 根據顯示的國家名稱進行搜尋比對
-                  final country = filteredCountries.firstWhere((c) => c.code == item.value);
-                  return country.name.toLowerCase().contains(searchValue.toLowerCase());
+                  final country = filteredCountries.firstWhere(
+                    (c) => c.code == item.value,
+                  );
+                  return country.name.toLowerCase().contains(
+                    searchValue.toLowerCase(),
+                  );
                 },
               ),
               onMenuStateChange: (isOpen) {

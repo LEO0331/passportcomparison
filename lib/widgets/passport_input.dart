@@ -31,10 +31,14 @@ class PassportInputRow extends StatelessWidget {
               isExpanded: true,
               hint: Text("Passport ${index + 1}"),
               value: selectedCode,
-              items: countries.map((c) => DropdownMenuItem(
-                value: c.code, 
-                child: Text(c.name, overflow: TextOverflow.ellipsis)
-              )).toList(),
+              items: countries
+                  .map(
+                    (c) => DropdownMenuItem(
+                      value: c.code,
+                      child: Text(c.name, overflow: TextOverflow.ellipsis),
+                    ),
+                  )
+                  .toList(),
               onChanged: onCountryChanged,
             ),
           ),
@@ -44,9 +48,10 @@ class PassportInputRow extends StatelessWidget {
             child: DropdownButton<String>(
               isExpanded: true,
               value: selectedYear,
-              items: List.generate(21, (i) => (2006 + i).toString())
-                  .map((y) => DropdownMenuItem(value: y, child: Text(y)))
-                  .toList(),
+              items: List.generate(
+                21,
+                (i) => (2006 + i).toString(),
+              ).map((y) => DropdownMenuItem(value: y, child: Text(y))).toList(),
               onChanged: onYearChanged,
             ),
           ),

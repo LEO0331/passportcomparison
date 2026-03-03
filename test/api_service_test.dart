@@ -18,8 +18,8 @@ void main() {
 
   setUp(() {
     // 3. 關鍵：設定 SharedPreferences 的模擬初始值（即便為空也要設定）
-    SharedPreferences.setMockInitialValues({}); 
-    
+    SharedPreferences.setMockInitialValues({});
+
     mockClient = MockClient();
     apiService = ApiService(client: mockClient);
   });
@@ -27,22 +27,30 @@ void main() {
   group('ApiService Tests', () {
     test('fetchCountries returns List<Country> on 200', () async {
       // 模擬 API 回傳
-      when(mockClient.get(any)).thenAnswer((_) async => http.Response(
-        jsonEncode({
-          "countries": [{"code": "TW", "country": "Taiwan", "has_data": false}]
-        }), 200));
+      when(mockClient.get(any)).thenAnswer(
+        (_) async => http.Response(
+          jsonEncode({
+            "countries": [
+              {"code": "TW", "country": "Taiwan", "has_data": false},
+            ],
+          }),
+          200,
+        ),
+      );
 
       final result = await apiService.fetchCountries();
-      
+
       expect(result.first.code, 'TW');
       expect(result.first.name, 'Taiwan');
     });
 
     test('fetchCountries returns empty list on 404', () async {
-      when(mockClient.get(any)).thenAnswer((_) async => http.Response('Not Found', 404));
-      
+      when(
+        mockClient.get(any),
+      ).thenAnswer((_) async => http.Response('Not Found', 404));
+
       final result = await apiService.fetchCountries();
-      
+
       expect(result, isEmpty);
     });
   });

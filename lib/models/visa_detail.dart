@@ -1,7 +1,8 @@
 // 在 main.dart 或 logic 控制層中
 Map<String, List<String>> generateComparisonMatrix(
-    List<String> allCountryNames, // 全球所有國家的清單
-    Map<String, Set<String>> visaFreeSets // 格式：{ "護照A": {"目的地1", "目的地2"}, "護照B": {...} }
+  List<String> allCountryNames, // 全球所有國家的清單
+  Map<String, Set<String>>
+  visaFreeSets, // 格式：{ "護照A": {"目的地1", "目的地2"}, "護照B": {...} }
 ) {
   Map<String, List<String>> matrix = {};
 

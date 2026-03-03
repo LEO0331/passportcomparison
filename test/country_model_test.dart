@@ -11,8 +11,8 @@ void main() {
         "openness": 143.0,
         "has_data": true,
         "data": {
-          "2024": {"rank": 35, "total": 143}
-        }
+          "2024": {"rank": 35, "total": 143},
+        },
       };
       final country = Country.fromJson(json);
       expect(country.code, 'TW');
