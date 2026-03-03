@@ -17,7 +17,7 @@ class ApiService {
         final List<dynamic> data = json.decode(response.body)['countries']; 
         return data.map((c) => Country.fromJson(c)).toList();
       } else {
-        _logger.w("API 伺服器回傳錯誤: ${response.statusCode}");
+        _logger.w("API error: ${response.statusCode}");
       }
     } catch (e) {
       _logger.w("Offline mode: Loading cached countries");

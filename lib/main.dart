@@ -51,7 +51,7 @@ class _PassportComparePageState extends State<PassportComparePage> {
   // 狀態變數
   int passportCount = 2; 
   List<Country> allCountries = []; 
-  bool hasInitialized = false; // 控制是否已抓取國家清單
+  bool hasInitialized = false; 
   bool isLoadingInitial = false;
   bool isComparing = false;
   bool showDetails = false;
@@ -70,7 +70,6 @@ class _PassportComparePageState extends State<PassportComparePage> {
       if (image == null) return;
       if (kIsWeb) {
         // 在 Web 端，'share_plus' 的圖片分享有限制
-        // 建議直接使用 'printing' 套件的分享功能，它在 Web 表現最穩
         await Printing.sharePdf(
           bytes: image, 
           filename: 'passport_comparison.png'
@@ -791,13 +790,9 @@ Future<void> _onAddToFavorite() async {
 }
 
 Widget _buildFavoriteSummaryPreview(Map<String, dynamic> item) {
-  // final List<String> codes = (item['codes'] as List)
-  //     .where((e) => e != null) // 關鍵：過濾掉 null
-  //     .map((e) => e.toString())
-  //     .toList();
 final List<Map<String, dynamic>> codes = (item['summary'] as List? ?? [])
       .where((e) => e != null) // 過濾掉 null 元素
-      .cast<Map<String, dynamic>>() // 強制轉型為需要的 Map 格式
+      .cast<Map<String, dynamic>>() 
       .toList();
 
   if (codes.isEmpty) return const SizedBox.shrink(); // 如果沒資料就隱藏
