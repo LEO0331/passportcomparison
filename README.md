@@ -58,6 +58,5 @@ Save frequent comparisons with custom names.
 
 ### 3. Professional PDF Export (Full vs. Diff Only)
 Choose between a **Full Report** or a **Difference-Only Report**. The "Diff Only" mode is perfect for travelers who only want to know which destinations require a visa for one passport but not the other.
-> ![PDF Export Demo1](assets/screenshots/pdf1.pdf)
-> ![PDF Export Demo2](assets/screenshots/pdf2.pdf)
-
+[View Full Report Sample (PDF)](assets/screenshots/pdf1.pdf)
+[View Difference-Only Report Sample (PDF)](assets/screenshots/pdf2.pdf)

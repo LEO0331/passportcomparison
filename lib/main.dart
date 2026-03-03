@@ -826,10 +826,11 @@ class _PassportComparePageState extends State<PassportComparePage> {
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: List.generate(passportCount, (i) {
           final code = selectedCountryCodes[i];
-          if (code == null)
+          if (code == null) {
             return const Expanded(
               child: Center(child: Text("Select Passport")),
             );
+          }
 
           final country = allCountries.firstWhere((c) => c.code == code);
           final selectedYear = selectedYears[i];
