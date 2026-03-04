@@ -24,9 +24,7 @@ jobs:
         run: flutter pub get
 
       - name: Build Web
-        # 關鍵：將 <passportcomparison> 替換為你的 GitHub 倉庫名稱 (Repository Name)
-        # 例如：https://github.com -> base-href 就要設為 "/my_app/"
-        run: flutter build web --release --base-href "/passportcomparison/"
+        run: flutter build web --release --web-renderer html --base-href "/passportcomparison/"
 
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3

@@ -60,3 +60,8 @@ Save frequent comparisons with custom names.
 Choose between a **Full Report** or a **Difference-Only Report**. The "Diff Only" mode is perfect for travelers who only want to know which destinations require a visa for one passport but not the other.
 [View Full Report Sample (PDF)](assets/screenshots/pdf1.pdf)
 [View Difference-Only Report Sample (PDF)](assets/screenshots/pdf2.pdf)
+
+### 🔗 Live Demo
+[Check out the App here!](https://leo0331.github.io/passportcomparison/)
+
+![Deploy Status](https://github.com/leo0331/passportcomparison/actions/workflows/deploy.yml/badge.svg)
