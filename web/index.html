@@ -41,6 +41,19 @@
     For more details:
     * https://docs.flutter.dev/platform-integration/web/initialization
   -->
-  <script src="flutter_bootstrap.js" async></script>
+  <script>
+    {{flutter_bootstrap_js}}
+    
+    // 攔截並自定義啟動配置
+    _flutter.loader.load({
+      onEntrypointLoaded: async function(engineInitializer) {
+        const engine = await engineInitializer.initializeEngine({
+          // 強制使用 html 渲染器，讓 Chrome 翻譯引擎可以抓到文字標籤
+          renderer: "html",
+        });
+        await engine.runApp();
+      }
+    });
+  </script>
 </body>
 </html>
