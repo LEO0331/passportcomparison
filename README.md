@@ -65,3 +65,5 @@ Choose between a **Full Report** or a **Difference-Only Report**. The "Diff Only
 [Check out the App here!](https://leo0331.github.io/passportcomparison/)
 
 ![Deploy Status](https://github.com/leo0331/passportcomparison/actions/workflows/deploy.yml/badge.svg)
+
+![test coverage](assets/screenshots/demo5.png)

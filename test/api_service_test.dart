@@ -5,7 +5,6 @@ import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:passportcomparison/services/api_service.dart';
-import 'package:passportcomparison/models/country.dart';
 
 import 'api_service_test.mocks.dart';
 
