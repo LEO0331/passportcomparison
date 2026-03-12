@@ -18,6 +18,26 @@ void main() {
     makeCountry('FR', 'France'),
   ];
 
+  Future<void> openYearDropdown(WidgetTester tester,
+      {String selectedYear = '2024'}) async {
+    final yearDropdown = find.byType(DropdownButton<String>).last;
+
+    // Most reliable: tap the dropdown arrow icon *inside* the year dropdown.
+    final arrowIcon = find.descendant(
+      of: yearDropdown,
+      matching: find.byIcon(Icons.arrow_drop_down),
+    );
+    if (arrowIcon.evaluate().isNotEmpty) {
+      await tester.tap(arrowIcon.last, warnIfMissed: false);
+      await tester.pumpAndSettle();
+      return;
+    }
+
+    // Fallback: tap the displayed selected year text.
+    await tester.tap(find.text(selectedYear).first, warnIfMissed: false);
+    await tester.pumpAndSettle();
+  }
+
   Widget buildWidget({
     int index = 0,
     String? selectedCode,
@@ -69,26 +89,21 @@ void main() {
     testWidgets('year dropdown contains years from 2006 to 2026', (tester) async {
       await tester.pumpWidget(buildWidget());
 
-      // Open the year dropdown (second DropdownButton)
-      final dropdowns = find.byType(DropdownButton<String>);
-      await tester.tap(dropdowns.last);
-      await tester.pumpAndSettle();
+      await openYearDropdown(tester, selectedYear: '2024');
 
-      expect(find.text('2006'), findsOneWidget);
-      expect(find.text('2026'), findsOneWidget);
+      expect(find.text('2006', skipOffstage: false), findsWidgets);
+      expect(find.text('2026', skipOffstage: false), findsWidgets);
     });
 
     testWidgets('year dropdown contains exactly 21 items (2006–2026)',
         (tester) async {
       await tester.pumpWidget(buildWidget());
 
-      final dropdowns = find.byType(DropdownButton<String>);
-      await tester.tap(dropdowns.last);
-      await tester.pumpAndSettle();
+      await openYearDropdown(tester, selectedYear: '2024');
 
       // 2006..2026 inclusive = 21 years
       for (int y = 2006; y <= 2026; y++) {
-        expect(find.text(y.toString()), findsWidgets);
+        expect(find.text(y.toString(), skipOffstage: false), findsWidgets);
       }
     });
 

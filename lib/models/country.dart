@@ -26,7 +26,9 @@ class Country {
       openness: (json['openness'] ?? 0.0).toDouble(),
       hasData: hasData,
       // 核心邏輯：只有 hasData 為 true 且 json['data'] 是 Map 時才賦值
-      yearlyData: (hasData && json['data'] is Map) ? json['data'] : null,
+      yearlyData: (hasData && json['data'] is Map)
+          ? Map<String, dynamic>.from(json['data'] as Map)
+          : null,
     );
   }
 }

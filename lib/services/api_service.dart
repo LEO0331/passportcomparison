@@ -40,7 +40,7 @@ class ApiService {
       return _cache[countryCode]!;
     }
     try {
-      final response = await http.get(
+      final response = await client.get(
         Uri.parse('$baseUrl/visa-single/$countryCode'),
       );
       if (response.statusCode == 200) {
