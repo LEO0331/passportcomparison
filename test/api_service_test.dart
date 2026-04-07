@@ -15,7 +15,10 @@ void main() {
 
   setUp(() {
     mockClient = MockClient();
-    service = ApiService(client: mockClient);
+    service = ApiService(
+      client: mockClient,
+      localCountriesLoader: () async => throw Exception('No local fixture'),
+    );
     // Use in-memory SharedPreferences for all tests
     SharedPreferences.setMockInitialValues({});
   });
@@ -83,6 +86,22 @@ void main() {
 
       final countries = await service.fetchCountries();
       expect(countries, isEmpty);
+    });
+
+    test('returns local dataset when API fails and cache is unavailable', () async {
+      const localFallbackBody =
+          '{"countries":[{"code":"US","country":"United States","region":"North America","openness":85.0,"has_data":true,"data":{"2024":188}}]}';
+
+      service = ApiService(
+        client: mockClient,
+        localCountriesLoader: () async => localFallbackBody,
+      );
+      when(mockClient.get(any)).thenThrow(Exception('No internet'));
+
+      final countries = await service.fetchCountries();
+      expect(countries.length, 1);
+      expect(countries.first.code, 'US');
+      expect(countries.first.name, 'United States');
     });
 
     test('caches response body after successful fetch', () async {

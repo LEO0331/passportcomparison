@@ -18,36 +18,100 @@ import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:share_plus/share_plus.dart';
 
-ThemeMode _themeMode = ThemeMode.system;
+void _noopThemeToggle() {}
+
 void main() {
-  runApp(
-    MaterialApp(
-      home: PassportComparePage(),
+  runApp(const PassportComparisonApp());
+}
+
+class PassportComparisonApp extends StatefulWidget {
+  const PassportComparisonApp({super.key});
+
+  @override
+  State<PassportComparisonApp> createState() => _PassportComparisonAppState();
+}
+
+class _PassportComparisonAppState extends State<PassportComparisonApp> {
+  ThemeMode _themeMode = ThemeMode.dark;
+
+  void _toggleTheme() {
+    setState(() {
+      _themeMode = _themeMode == ThemeMode.dark
+          ? ThemeMode.light
+          : ThemeMode.dark;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    const seed = Color(0xFFB34A32);
+    final light = ColorScheme.fromSeed(
+      seedColor: seed,
+      brightness: Brightness.light,
+      primary: const Color(0xFF803827),
+      surface: const Color(0xFFF5EFE6),
+      onSurface: const Color(0xFF201A18),
+    );
+    final dark = ColorScheme.fromSeed(
+      seedColor: seed,
+      brightness: Brightness.dark,
+      primary: const Color(0xFFE38A6F),
+      surface: const Color(0xFF161C1F),
+      onSurface: const Color(0xFFF3EDE4),
+    );
+
+    ThemeData buildTheme(ColorScheme colors) {
+      return ThemeData(
+        useMaterial3: true,
+        colorScheme: colors,
+        scaffoldBackgroundColor: colors.surface,
+        textTheme: const TextTheme(
+          headlineMedium: TextStyle(
+            fontWeight: FontWeight.w800,
+            letterSpacing: -0.3,
+            height: 1.1,
+          ),
+          titleLarge: TextStyle(
+            fontWeight: FontWeight.w800,
+            letterSpacing: 0.2,
+          ),
+          bodyMedium: TextStyle(height: 1.35),
+          labelLarge: TextStyle(
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.3,
+          ),
+        ),
+      );
+    }
+
+    return MaterialApp(
       debugShowCheckedModeBanner: false,
       themeMode: _themeMode,
-      theme: ThemeData(
-        useMaterial3: true,
-        colorSchemeSeed: Colors.blueGrey,
-        brightness: Brightness.light,
+      theme: buildTheme(light),
+      darkTheme: buildTheme(dark),
+      home: PassportComparePage(
+        themeMode: _themeMode,
+        onToggleTheme: _toggleTheme,
       ),
-      darkTheme: ThemeData(
-        useMaterial3: true,
-        brightness: Brightness.dark,
-        colorSchemeSeed: Colors.blueGrey,
-      ),
-    ),
-  );
+    );
+  }
 }
 
 class PassportComparePage extends StatefulWidget {
-  const PassportComparePage({super.key});
+  final ThemeMode themeMode;
+  final VoidCallback onToggleTheme;
+
+  const PassportComparePage({
+    super.key,
+    this.themeMode = ThemeMode.dark,
+    this.onToggleTheme = _noopThemeToggle,
+  });
 
   @override
   State<PassportComparePage> createState() => _PassportComparePageState();
 }
 
 class _PassportComparePageState extends State<PassportComparePage> {
-  ThemeMode _themeMode = ThemeMode.system; // 預設跟隨系統
   final ApiService _apiService = ApiService();
   final _logger = Logger();
   static final String currentYear = DateTime.now().year.toString();
@@ -67,6 +131,28 @@ class _PassportComparePageState extends State<PassportComparePage> {
 
   Map<String, Set<String>> visaFreeMap = {};
 
+  void _logInfo(String message) {
+    if (kDebugMode) {
+      _logger.i(message);
+    }
+  }
+
+  void _logWarn(String message, {Object? error, StackTrace? stackTrace}) {
+    if (kDebugMode) {
+      _logger.w(message, error: error, stackTrace: stackTrace);
+    } else {
+      _logger.w(message);
+    }
+  }
+
+  void _logError(String message, {Object? error, StackTrace? stackTrace}) {
+    if (kDebugMode) {
+      _logger.e(message, error: error, stackTrace: stackTrace);
+    } else {
+      _logger.e(message);
+    }
+  }
+
   // --- 分享截圖 ---
   Future<void> _shareScreenshot(ScreenshotController controller) async {
     try {
@@ -84,12 +170,15 @@ class _PassportComparePageState extends State<PassportComparePage> {
           '${tempDir.path}/passport_comparison.png',
         ).create();
         await file.writeAsBytes(image);
-        await Share.shareXFiles([
-          XFile(file.path),
-        ], text: 'Passport Comparison');
+        await SharePlus.instance.share(
+          ShareParams(files: [XFile(file.path)], text: 'Passport Comparison'),
+        );
+        if (await file.exists()) {
+          await file.delete();
+        }
       }
     } catch (e) {
-      _logger.e("Share error: $e");
+      _logError("Share failed");
     }
   }
 
@@ -223,7 +312,7 @@ class _PassportComparePageState extends State<PassportComparePage> {
       setState(() {
         _favorites = List<Map<String, dynamic>>.from(json.decode(favString));
       });
-      _logger.i("Loaded ${_favorites.length} favorites from disk.");
+      _logInfo("Loaded ${_favorites.length} favorites from disk.");
     }
   }
 
@@ -306,7 +395,7 @@ class _PassportComparePageState extends State<PassportComparePage> {
       passportCount = 2;
       hasInitialized = false; // 回到 Start 畫面
     });
-    _logger.w("User confirmed state reset.");
+    _logWarn("User confirmed state reset.");
   }
 
   Future<String?> _showRenameDialog(String initialTitle) async {
@@ -366,10 +455,6 @@ class _PassportComparePageState extends State<PassportComparePage> {
       );
       return;
     }
-    final activeCodes = selectedCountryCodes
-        .take(passportCount)
-        .whereType<String>()
-        .toList();
     try {
       List<String> names = selectedCountryCodes
           .take(passportCount)
@@ -380,27 +465,6 @@ class _PassportComparePageState extends State<PassportComparePage> {
 
       if (!mounted || customTitle == null) return; // 2. 建立一筆新的最愛紀錄
 
-      List<Map<String, dynamic>> summaryData = [];
-      for (int i = 0; i < activeCodes.length; i++) {
-        String code = activeCodes[i];
-        String year = selectedYears[i];
-
-        // 從 allCountries 找到該國家的模型
-        Country country = allCountries.firstWhere((c) => c.code == code);
-
-        // yearlyData 是一個 Map<String, dynamic>
-        var yearStats = country.yearlyData?[year];
-
-        summaryData.add({
-          'code': code,
-          'name': country.name,
-          'region': country.region,
-          'year': year,
-          'rank': yearStats?['rank']?.toString() ?? "N/A",
-          'visaFree': yearStats?['visa_free_count']?.toString() ?? "0",
-        });
-      }
-
       setState(() {
         _favorites.add({
           'title': names.join(' vs '),
@@ -408,7 +472,6 @@ class _PassportComparePageState extends State<PassportComparePage> {
           'codes': List.from(selectedCountryCodes),
           'years': List.from(selectedYears),
           'count': passportCount,
-          'summary': summaryData, // 存入這筆收藏的完整快照
         });
       });
       await _saveFavorites();
@@ -423,7 +486,7 @@ class _PassportComparePageState extends State<PassportComparePage> {
         ),
       );
     } catch (e) {
-      _logger.e("Failed to add favorite: $e");
+      _logError("Failed to add favorite");
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Error adding to favorites.")),
       );
@@ -472,7 +535,11 @@ class _PassportComparePageState extends State<PassportComparePage> {
           final codes = await _apiService.fetchVisaFreeCodes(code);
           visaFreeMap[code] = codes;
         } catch (e, stackTrace) {
-          _logger.e("Failed to fetch", error: e, stackTrace: stackTrace);
+          _logError(
+            "Failed to fetch visa details",
+            error: e,
+            stackTrace: stackTrace,
+          );
         }
       }
     }
@@ -481,42 +548,57 @@ class _PassportComparePageState extends State<PassportComparePage> {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Scaffold(
       appBar: AppBar(
         title: Text(
           _selectedIndex == 0 ? "Passport Comparison" : "My Favorites",
+          style: const TextStyle(
+            fontWeight: FontWeight.w800,
+            letterSpacing: 0.2,
+          ),
         ),
-        backgroundColor: const Color(0xFF455A64),
-        foregroundColor: Colors.white,
+        backgroundColor: Theme.of(context).colorScheme.surface,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
         actions: [
           IconButton(
             icon: Icon(
-              _themeMode == ThemeMode.dark ? Icons.light_mode : Icons.dark_mode,
+              widget.themeMode == ThemeMode.dark
+                  ? Icons.wb_sunny_outlined
+                  : Icons.nights_stay_outlined,
             ),
             tooltip: "switch modes",
-            onPressed: () {
-              setState(() {
-                _themeMode = _themeMode == ThemeMode.dark
-                    ? ThemeMode.light
-                    : ThemeMode.dark;
-              });
-            },
+            onPressed: widget.onToggleTheme,
           ),
           const SizedBox(width: 8),
         ],
       ),
       drawer: Drawer(
+        backgroundColor: Theme.of(context).colorScheme.surface,
         child: Column(
           children: [
-            const DrawerHeader(
-              decoration: BoxDecoration(color: Color(0xFF455A64)),
+            DrawerHeader(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: isDark
+                      ? const [Color(0xFF1D2A2E), Color(0xFF152124)]
+                      : const [Color(0xFF7B392A), Color(0xFFA6533D)],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+              ),
               child: Center(
                 child: Text(
                   "Passport Index\nToolbox",
                   style: TextStyle(
-                    color: Colors.white,
+                    color: isDark
+                        ? const Color(0xFFEFE7DA)
+                        : const Color(0xFFFDF5EA),
                     fontSize: 20,
-                    fontWeight: FontWeight.bold,
+                    fontWeight: FontWeight.w800,
+                    letterSpacing: 0.5,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -543,48 +625,106 @@ class _PassportComparePageState extends State<PassportComparePage> {
           ],
         ),
       ),
-      body: _selectedIndex == 0 ? _buildHomePage() : _buildFavoritesPage(),
+      body: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 350),
+        switchInCurve: Curves.easeOutCubic,
+        switchOutCurve: Curves.easeInCubic,
+        child: _selectedIndex == 0 ? _buildHomePage() : _buildFavoritesPage(),
+      ),
     );
   }
 
   Widget _buildHomePage() {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     return Screenshot(
       controller: _screenshotController,
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
-
-        child: Column(
-          children: [
-            // 步驟 1: 選擇人數
-            const Text(
-              "How many passports to compare today? (Max 5)",
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-            ),
-
-            SizedBox(height: 5),
-            SegmentedButton<int>(
-              segments: const [
-                ButtonSegment(value: 1, label: Text('1')),
-                ButtonSegment(value: 2, label: Text('2')),
-                ButtonSegment(value: 3, label: Text('3')),
-                ButtonSegment(value: 4, label: Text('4')),
-                ButtonSegment(value: 5, label: Text('5')),
-              ],
-              selected: {passportCount},
-              onSelectionChanged: !hasInitialized
-                  ? (Set<int> newSelection) {
-                      setState(() => passportCount = newSelection.first);
-                    }
-                  : null,
-              style: const ButtonStyle(
-                visualDensity: VisualDensity.comfortable,
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: isDark
+                ? const [Color(0xFF13191C), Color(0xFF1A2226)]
+                : const [Color(0xFFF4E9DD), Color(0xFFEEDFD0)],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.fromLTRB(18, 18, 18, 14),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(22),
+                  gradient: LinearGradient(
+                    colors: isDark
+                        ? const [Color(0xFF25343A), Color(0xFF1E2A2F)]
+                        : const [Color(0xFF8D4430), Color(0xFFB35A40)],
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.18),
+                      blurRadius: 18,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Passport Atlas",
+                      style: theme.textTheme.headlineMedium?.copyWith(
+                        color: const Color(0xFFF9F3E8),
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      "Model mobility strength, compare access patterns, and export shareable reports.",
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: const Color(0xFFF5ECE1).withValues(alpha: 0.9),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            // 步驟 2: 點擊開始抓取 API
-            SizedBox(height: 5),
-            if (!hasInitialized)
-              Center(
-                child: ElevatedButton(
+              const SizedBox(height: 18),
+              Text(
+                "How many passports to compare today? (Max 5)",
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 8),
+              SegmentedButton<int>(
+                segments: const [
+                  ButtonSegment(value: 1, label: Text('1')),
+                  ButtonSegment(value: 2, label: Text('2')),
+                  ButtonSegment(value: 3, label: Text('3')),
+                  ButtonSegment(value: 4, label: Text('4')),
+                  ButtonSegment(value: 5, label: Text('5')),
+                ],
+                selected: {passportCount},
+                onSelectionChanged: !hasInitialized
+                    ? (Set<int> newSelection) {
+                        setState(() => passportCount = newSelection.first);
+                      }
+                    : null,
+                style: ButtonStyle(
+                  visualDensity: VisualDensity.comfortable,
+                  backgroundColor: WidgetStateProperty.resolveWith((states) {
+                    if (states.contains(WidgetState.selected)) {
+                      return const Color(0xFFD46B54).withValues(alpha: 0.2);
+                    }
+                    return null;
+                  }),
+                ),
+              ),
+              const SizedBox(height: 10),
+              if (!hasInitialized)
+                FilledButton.tonal(
                   onPressed: isLoadingInitial ? null : _onStartComparing,
                   child: isLoadingInitial
                       ? const SizedBox(
@@ -594,135 +734,139 @@ class _PassportComparePageState extends State<PassportComparePage> {
                         )
                       : const Text("Start"),
                 ),
-              ),
-
-            // 步驟 3: 顯示輸入列
-            if (hasInitialized) ...[
-              const Divider(height: 30),
-              ...List.generate(
-                passportCount,
-                (i) => PassportInputRow(
-                  index: i,
-                  countries: allCountries,
-                  selectedCode: selectedCountryCodes[i],
-                  selectedYear: selectedYears[i],
-                  onCountryChanged: (val) {
-                    setState(() {
-                      selectedCountryCodes[i] = val;
-                      showDetails = false; // 國家一變，就強制關閉詳情，要求用戶手動再按一次
-                    });
-                  },
-                  onYearChanged: (val) {
-                    setState(() {
-                      selectedYears[i] = val!;
-                      showDetails = false;
-                    });
-                  },
+              if (hasInitialized) ...[
+                const SizedBox(height: 12),
+                const Divider(height: 20),
+                ...List.generate(
+                  passportCount,
+                  (i) => PassportInputRow(
+                    index: i,
+                    countries: allCountries,
+                    selectedCode: selectedCountryCodes[i],
+                    selectedYear: selectedYears[i],
+                    onCountryChanged: (val) {
+                      setState(() {
+                        selectedCountryCodes[i] = val;
+                        showDetails = false;
+                      });
+                    },
+                    onYearChanged: (val) {
+                      setState(() {
+                        selectedYears[i] = val!;
+                        showDetails = false;
+                      });
+                    },
+                  ),
                 ),
-              ),
-
-              const SizedBox(height: 20),
-              // 按鈕列
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  ElevatedButton(
-                    onPressed:
-                        selectedCountryCodes.take(passportCount).contains(null)
-                        ? null
-                        : () => setState(() => isComparing = true),
-                    child: const Text("Compare"),
-                  ),
-                  const SizedBox(width: 10),
-                  ElevatedButton(
-                    onPressed: isComparing ? _onShowDetails : null,
-                    child: const Text("Details"),
-                  ),
-                  const SizedBox(width: 10),
-                  IconButton.filled(
-                    onPressed: isComparing ? _onAddToFavorite : null,
-                    icon: const Icon(Icons.favorite_border),
-                    style: IconButton.styleFrom(
-                      backgroundColor: Colors.pink.shade300,
+                const SizedBox(height: 18),
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: [
+                    ElevatedButton(
+                      onPressed:
+                          selectedCountryCodes
+                              .take(passportCount)
+                              .contains(null)
+                          ? null
+                          : () => setState(() => isComparing = true),
+                      child: const Text("Compare"),
                     ),
-                    tooltip: "Add to Favorite",
-                  ),
-                  const SizedBox(width: 10),
-                  IconButton.filled(
-                    onPressed: _onReset,
-                    icon: const Icon(Icons.restart_alt),
-                    style: IconButton.styleFrom(
-                      backgroundColor: Colors.orange.shade400,
+                    ElevatedButton(
+                      onPressed: isComparing ? _onShowDetails : null,
+                      child: const Text("Details"),
                     ),
-                    tooltip: "Reset All",
-                  ),
-                  const SizedBox(width: 10),
-                  IconButton(
-                    onPressed: isComparing
-                        ? () => _shareScreenshot(_screenshotController)
-                        : null,
-                    icon: const Icon(Icons.share_outlined),
-                    tooltip: "Share Screenshot",
-                  ),
-                  const SizedBox(width: 10),
-                  IconButton(
-                    onPressed: isComparing
-                        ? () => _exportToPdf(diffOnly: false)
-                        : null,
-                    icon: const Icon(Icons.picture_as_pdf_outlined),
-                    tooltip: "Export Full PDF",
-                  ),
-                  const SizedBox(width: 10),
-                  // --- 僅差異 PDF 導出 (新加入) ---
-                  IconButton.filled(
-                    onPressed: isComparing
-                        ? () => _exportToPdf(diffOnly: true)
-                        : null,
-                    icon: const Icon(Icons.difference_outlined),
-                    style: IconButton.styleFrom(
-                      backgroundColor: Colors.teal.shade400,
+                    IconButton.filledTonal(
+                      onPressed: isComparing ? _onAddToFavorite : null,
+                      icon: const Icon(Icons.favorite_border),
+                      tooltip: "Add to Favorite",
                     ),
-                    tooltip: "Export Differences Only PDF",
-                  ),
-                ],
-              ),
-            ],
-            // 步驟 4: 顯示摘要結果 (Rank, Visa Free Count)
-            if (isComparing) ...[
-              const SizedBox(height: 20),
-              _buildSummaryResults(),
-            ],
-            // 步驟 5: 顯示詳細比對表 (打勾/打叉清單)
-            if (showDetails) ...[
-              const SizedBox(height: 40),
-              const Row(
-                children: [
-                  Expanded(child: Divider()),
-                  Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16),
-                    child: Text(
-                      "Detailed Access Comparison",
-                      style: TextStyle(
-                        color: Colors.grey,
-                        fontWeight: FontWeight.bold,
+                    IconButton.filledTonal(
+                      onPressed: _onReset,
+                      icon: const Icon(Icons.restart_alt),
+                      tooltip: "Reset All",
+                    ),
+                    IconButton(
+                      onPressed: isComparing
+                          ? () => _shareScreenshot(_screenshotController)
+                          : null,
+                      icon: const Icon(Icons.share_outlined),
+                      tooltip: "Share Screenshot",
+                    ),
+                    IconButton(
+                      onPressed: isComparing
+                          ? () => _exportToPdf(diffOnly: false)
+                          : null,
+                      icon: const Icon(Icons.picture_as_pdf_outlined),
+                      tooltip: "Export Full PDF",
+                    ),
+                    IconButton.filledTonal(
+                      onPressed: isComparing
+                          ? () => _exportToPdf(diffOnly: true)
+                          : null,
+                      icon: const Icon(Icons.difference_outlined),
+                      tooltip: "Export Differences Only PDF",
+                    ),
+                  ],
+                ),
+              ],
+              if (isComparing) ...[
+                const SizedBox(height: 22),
+                _buildSummaryResults(),
+              ],
+              if (showDetails) ...[
+                const SizedBox(height: 34),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Divider(
+                        color: theme.colorScheme.outlineVariant.withValues(
+                          alpha: 0.5,
+                        ),
                       ),
                     ),
-                  ),
-                  Expanded(child: Divider()),
-                ],
-              ),
-              const SizedBox(height: 20),
-              _buildDetailsSection(),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      child: Text(
+                        "Detailed Access Comparison",
+                        style: theme.textTheme.labelLarge?.copyWith(
+                          color: theme.colorScheme.onSurface.withValues(
+                            alpha: 0.7,
+                          ),
+                        ),
+                      ),
+                    ),
+                    Expanded(
+                      child: Divider(
+                        color: theme.colorScheme.outlineVariant.withValues(
+                          alpha: 0.5,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                _buildDetailsSection(),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );
   }
 
   Widget _buildFavoritesPage() {
+    final theme = Theme.of(context);
     if (_favorites.isEmpty) {
-      return const Center(child: Text("No favorites added yet."));
+      return Center(
+        child: Text(
+          "No favorites added yet.",
+          style: theme.textTheme.titleMedium?.copyWith(
+            color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+          ),
+        ),
+      );
     }
 
     return ListView.builder(
@@ -741,13 +885,20 @@ class _PassportComparePageState extends State<PassportComparePage> {
             [];
 
         return Card(
-          margin: const EdgeInsets.only(bottom: 12),
+          margin: const EdgeInsets.only(bottom: 14),
           clipBehavior: Clip.antiAlias,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: BorderSide(
+              color: theme.colorScheme.outlineVariant.withValues(alpha: 0.55),
+            ),
+          ),
           child: ExpansionTile(
             leading: const Icon(Icons.folder_shared_outlined),
             title: Text(
               title,
-              style: const TextStyle(fontWeight: FontWeight.bold),
+              style: const TextStyle(fontWeight: FontWeight.w800),
             ),
             subtitle: Text(
               "Saved on: $date",
@@ -768,13 +919,12 @@ class _PassportComparePageState extends State<PassportComparePage> {
                     const Text(
                       "Quick Summary",
                       style: TextStyle(
-                        fontWeight: FontWeight.bold,
+                        fontWeight: FontWeight.w700,
                         fontSize: 12,
                       ),
                     ),
                     const SizedBox(height: 10),
-                    // 1. 這裡放置縮小版的摘要組件 (Reuse 你的 _buildSummaryResults 邏輯)
-                    _buildFavoriteSummaryPreview(item),
+                    _buildFavoriteSummaryPreview(context, item, allCountries),
                     const Divider(height: 30),
                     const Text(
                       "Detailed Access",
@@ -784,14 +934,12 @@ class _PassportComparePageState extends State<PassportComparePage> {
                       ),
                     ),
                     const SizedBox(height: 10),
-                    // 2. 直接顯示詳細表
                     ComparisonTable(
                       selectedCodes: activeCodes,
                       allCountries: allCountries,
                       visaFreeMap: visaFreeMap,
                     ),
                     const SizedBox(height: 12),
-                    // 3. 恢復到首頁繼續編輯按鈕
                     TextButton.icon(
                       onPressed: () => _loadFavoriteToHome(item),
                       icon: const Icon(Icons.edit_note),
@@ -808,18 +956,21 @@ class _PassportComparePageState extends State<PassportComparePage> {
   }
 
   Widget _buildSummaryResults() {
+    final theme = Theme.of(context);
     return Container(
       margin: const EdgeInsets.only(top: 24),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color.fromARGB(255, 166, 186, 196).withValues(),
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.white, width: 2),
+        color: theme.colorScheme.surface.withValues(alpha: 0.95),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.7),
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 16,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
@@ -858,9 +1009,8 @@ class _PassportComparePageState extends State<PassportComparePage> {
                 const SizedBox(height: 8),
                 Text(
                   country.name,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 12,
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    fontWeight: FontWeight.w700,
                   ),
                   textAlign: TextAlign.center,
                   maxLines: 1,
@@ -873,12 +1023,18 @@ class _PassportComparePageState extends State<PassportComparePage> {
                     vertical: 2,
                   ),
                   decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(4),
+                    color: theme.colorScheme.surfaceContainerHighest.withValues(
+                      alpha: 0.5,
+                    ),
+                    borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
                     country.region,
-                    style: const TextStyle(fontSize: 9, color: Colors.blueGrey),
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: theme.colorScheme.onSurface.withValues(
+                        alpha: 0.75,
+                      ),
+                    ),
                   ),
                 ),
 
@@ -892,8 +1048,8 @@ class _PassportComparePageState extends State<PassportComparePage> {
                   Text(
                     "Rank: ${yearData['rank']}",
                     style: const TextStyle(
-                      color: Color.fromARGB(255, 149, 62, 80),
-                      fontWeight: FontWeight.bold,
+                      color: Color(0xFFB34A32),
+                      fontWeight: FontWeight.w800,
                       fontSize: 14,
                     ),
                   ),
@@ -920,7 +1076,7 @@ class _PassportComparePageState extends State<PassportComparePage> {
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             fontSize: 10,
-                            color: Color(0xFF455A64),
+                            color: Color(0xFF5D6A6E),
                             fontWeight: FontWeight.w500,
                           ),
                         ),
@@ -957,45 +1113,72 @@ class _PassportComparePageState extends State<PassportComparePage> {
   }
 }
 
-Widget _buildFavoriteSummaryPreview(Map<String, dynamic> item) {
-  final List<Map<String, dynamic>> codes = (item['summary'] as List? ?? [])
-      .where((e) => e != null) // 過濾掉 null 元素
-      .cast<Map<String, dynamic>>()
+Widget _buildFavoriteSummaryPreview(
+  BuildContext context,
+  Map<String, dynamic> item,
+  List<Country> allCountries,
+) {
+  final theme = Theme.of(context);
+  final List<String> codes = (item['codes'] as List? ?? [])
+      .where((e) => e != null)
+      .map((e) => e.toString())
+      .where((e) => e.isNotEmpty)
+      .toList();
+  final List<String> years = (item['years'] as List? ?? [])
+      .where((e) => e != null)
+      .map((e) => e.toString())
       .toList();
 
   if (codes.isEmpty) return const SizedBox.shrink(); // 如果沒資料就隱藏
 
   return Row(
     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-    children: codes.map((code) {
-      final String rawCode = code['code']?.toString() ?? "";
+    children: codes.asMap().entries.map((entry) {
+      final int index = entry.key;
+      final String rawCode = entry.value;
       final String displayCode = rawCode.trim().toUpperCase();
+      Country? country;
+      try {
+        country = allCountries.firstWhere((c) => c.code == displayCode);
+      } catch (_) {
+        country = null;
+      }
+      final year = index < years.length ? years[index] : "";
+      final yearDataMap = country?.yearlyData;
+      final yearStats = (country?.hasData ?? false) && yearDataMap != null
+          ? yearDataMap[year]
+          : null;
+
       return Column(
         children: [
-          //CountryFlag.fromCountryCode(code.toUpperCase()),
           CountryFlag.fromCountryCode(displayCode),
           const SizedBox(height: 4),
-          //Text(code, style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold)),
           Text(
-            code['name'],
-            style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold),
-          ),
-          Text(
-            "Region: ${code['region']}",
-            style: const TextStyle(fontSize: 9),
-          ),
-          Text("Rank: ${code['rank']}", style: const TextStyle(fontSize: 9)),
-          Text(
-            "Visa-Free: ${code['visaFree']}",
-            style: const TextStyle(
-              fontSize: 9,
-              color: Colors.green,
-              fontWeight: FontWeight.bold,
+            country?.name ?? displayCode,
+            style: theme.textTheme.labelSmall?.copyWith(
+              fontWeight: FontWeight.w800,
             ),
           ),
           Text(
-            "Year: ${code['year']}",
-            style: const TextStyle(fontSize: 8, color: Colors.grey),
+            "Region: ${country?.region ?? 'N/A'}",
+            style: theme.textTheme.labelSmall,
+          ),
+          Text(
+            "Rank: ${yearStats?['rank'] ?? 'N/A'}",
+            style: theme.textTheme.labelSmall,
+          ),
+          Text(
+            "Visa-Free: ${yearStats?['visa_free_count'] ?? 'N/A'}",
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: const Color(0xFF2E7D5A),
+              fontWeight: FontWeight.w800,
+            ),
+          ),
+          Text(
+            "Year: $year",
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.7),
+            ),
           ),
         ],
       );

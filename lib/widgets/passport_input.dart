@@ -21,41 +21,67 @@ class PassportInputRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: Row(
-        children: [
-          Expanded(
-            flex: 2,
-            child: DropdownButton<String>(
-              isExpanded: true,
-              hint: Text("Passport ${index + 1}"),
-              value: selectedCode,
-              items: countries
-                  .map(
-                    (c) => DropdownMenuItem(
-                      value: c.code,
-                      child: Text(c.name, overflow: TextOverflow.ellipsis),
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface.withValues(alpha: 0.92),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: theme.colorScheme.outlineVariant.withValues(alpha: 0.7),
+          ),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              flex: 2,
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  isExpanded: true,
+                  hint: Text(
+                    "Passport ${index + 1}",
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: theme.colorScheme.onSurface.withValues(
+                        alpha: 0.75,
+                      ),
                     ),
-                  )
-                  .toList(),
-              onChanged: onCountryChanged,
+                  ),
+                  value: selectedCode,
+                  items: countries
+                      .map(
+                        (c) => DropdownMenuItem(
+                          value: c.code,
+                          child: Text(c.name, overflow: TextOverflow.ellipsis),
+                        ),
+                      )
+                      .toList(),
+                  onChanged: onCountryChanged,
+                ),
+              ),
             ),
-          ),
-          const SizedBox(width: 10),
-          Expanded(
-            flex: 1,
-            child: DropdownButton<String>(
-              isExpanded: true,
-              value: selectedYear,
-              items: List.generate(
-                21,
-                (i) => (2006 + i).toString(),
-              ).map((y) => DropdownMenuItem(value: y, child: Text(y))).toList(),
-              onChanged: onYearChanged,
+            const SizedBox(width: 14),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 10),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surfaceContainerHighest.withValues(
+                  alpha: 0.8,
+                ),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: DropdownButtonHideUnderline(
+                child: DropdownButton<String>(
+                  value: selectedYear,
+                  items: List.generate(21, (i) => (2006 + i).toString())
+                      .map((y) => DropdownMenuItem(value: y, child: Text(y)))
+                      .toList(),
+                  onChanged: onYearChanged,
+                ),
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

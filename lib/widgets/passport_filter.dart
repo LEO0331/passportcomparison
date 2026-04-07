@@ -29,7 +29,7 @@ class _PassportFilterState extends State<PassportFilter> {
 
   @override
   Widget build(BuildContext context) {
-    // 取得當前選中的國家物件，用於顯示 Openness
+    final theme = Theme.of(context);
     final Country? currentCountry = widget.selectedCode != null
         ? widget.allCountries.firstWhere((c) => c.code == widget.selectedCode)
         : null;
@@ -49,17 +49,15 @@ class _PassportFilterState extends State<PassportFilter> {
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade200),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withValues(), blurRadius: 10),
-        ],
+        color: theme.colorScheme.surface.withValues(alpha: 0.92),
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(
+          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.6),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 第一列：區域、年份與 Openness 分數顯示
           Row(
             children: [
               Expanded(
@@ -91,16 +89,16 @@ class _PassportFilterState extends State<PassportFilter> {
                   onChanged: widget.onYearChanged,
                 ),
               ),
-              // 視覺反饋：Openness 分數
-              if (currentCountry != null)
+              if (currentCountry != null) ...[
+                const SizedBox(width: 8),
                 Expanded(
                   flex: 2,
                   child: OpennessIndicator(score: currentCountry.openness),
                 ),
+              ],
             ],
           ),
           const SizedBox(height: 16),
-          // 第二列：具備搜尋功能的國家下拉選單
           DropdownButtonHideUnderline(
             child: DropdownButton2<String>(
               isExpanded: true,
@@ -118,12 +116,15 @@ class _PassportFilterState extends State<PassportFilter> {
               buttonStyleData: ButtonStyleData(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: Colors.grey.shade400),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(
+                    color: theme.colorScheme.outlineVariant.withValues(
+                      alpha: 0.8,
+                    ),
+                  ),
                 ),
               ),
               dropdownStyleData: const DropdownStyleData(maxHeight: 300),
-              // 搜尋框設定
               dropdownSearchData: DropdownSearchData(
                 searchController: _searchController,
                 searchInnerWidgetHeight: 50,
@@ -146,7 +147,6 @@ class _PassportFilterState extends State<PassportFilter> {
                   ),
                 ),
                 searchMatchFn: (item, searchValue) {
-                  // 根據顯示的國家名稱進行搜尋比對
                   final country = filteredCountries.firstWhere(
                     (c) => c.code == item.value,
                   );

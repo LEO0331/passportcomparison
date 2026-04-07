@@ -8,6 +8,7 @@ class OpennessIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     Color color = Colors.red;
     if (score > 70) {
       color = Colors.green;
@@ -21,29 +22,28 @@ class OpennessIndicator extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            const Text(
+            Text(
               "Openness",
-              style: TextStyle(
-                fontSize: 10,
-                color: Color.fromARGB(255, 47, 45, 45),
+              style: theme.textTheme.labelSmall?.copyWith(
+                letterSpacing: 0.4,
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.8),
               ),
             ),
             Text(
               score.toStringAsFixed(1),
-              style: TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
+              style: theme.textTheme.labelSmall?.copyWith(
+                fontWeight: FontWeight.w800,
                 color: color,
               ),
             ),
           ],
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 6),
         ClipRRect(
-          borderRadius: BorderRadius.circular(4),
+          borderRadius: BorderRadius.circular(999),
           child: LinearProgressIndicator(
             value: score / 100,
-            backgroundColor: color.withValues(),
+            backgroundColor: color.withValues(alpha: 0.18),
             valueColor: AlwaysStoppedAnimation<Color>(color),
             minHeight: height,
           ),
