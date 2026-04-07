@@ -50,9 +50,9 @@ void main() {
     });
 
     test('returns parsed countries on HTTP 200', () async {
-      when(mockClient.get(any)).thenAnswer(
-        (_) async => http.Response(validResponseBody, 200),
-      );
+      when(
+        mockClient.get(any),
+      ).thenAnswer((_) async => http.Response(validResponseBody, 200));
 
       final countries = await service.fetchCountries();
 
@@ -63,9 +63,9 @@ void main() {
     });
 
     test('returns empty list on non-200 status', () async {
-      when(mockClient.get(any)).thenAnswer(
-        (_) async => http.Response('Not found', 404),
-      );
+      when(
+        mockClient.get(any),
+      ).thenAnswer((_) async => http.Response('Not found', 404));
 
       final countries = await service.fetchCountries();
       expect(countries, isEmpty);
@@ -82,33 +82,39 @@ void main() {
       expect(countries[0].code, 'JP');
     });
 
-    test('returns empty list when network throws and no cache exists', () async {
-      when(mockClient.get(any)).thenThrow(Exception('No internet'));
+    test(
+      'returns empty list when network throws and no cache exists',
+      () async {
+        when(mockClient.get(any)).thenThrow(Exception('No internet'));
 
-      final countries = await service.fetchCountries();
-      expect(countries, isEmpty);
-    });
+        final countries = await service.fetchCountries();
+        expect(countries, isEmpty);
+      },
+    );
 
-    test('returns local dataset when API fails and cache is unavailable', () async {
-      const localFallbackBody =
-          '{"countries":[{"code":"US","country":"United States","region":"North America","openness":85.0,"has_data":true,"data":{"2024":188}}]}';
+    test(
+      'returns local dataset when API fails and cache is unavailable',
+      () async {
+        const localFallbackBody =
+            '{"countries":[{"code":"US","country":"United States","region":"North America","openness":85.0,"has_data":true,"data":{"2024":188}}]}';
 
-      service = ApiService(
-        client: mockClient,
-        localCountriesLoader: () async => localFallbackBody,
-      );
-      when(mockClient.get(any)).thenThrow(Exception('No internet'));
+        service = ApiService(
+          client: mockClient,
+          localCountriesLoader: () async => localFallbackBody,
+        );
+        when(mockClient.get(any)).thenThrow(Exception('No internet'));
 
-      final countries = await service.fetchCountries();
-      expect(countries.length, 1);
-      expect(countries.first.code, 'US');
-      expect(countries.first.name, 'United States');
-    });
+        final countries = await service.fetchCountries();
+        expect(countries.length, 1);
+        expect(countries.first.code, 'US');
+        expect(countries.first.name, 'United States');
+      },
+    );
 
     test('caches response body after successful fetch', () async {
-      when(mockClient.get(any)).thenAnswer(
-        (_) async => http.Response(validResponseBody, 200),
-      );
+      when(
+        mockClient.get(any),
+      ).thenAnswer((_) async => http.Response(validResponseBody, 200));
 
       await service.fetchCountries();
 
@@ -177,9 +183,9 @@ void main() {
 
     test('can use default constructor loader path when API succeeds', () async {
       service = ApiService(client: mockClient);
-      when(mockClient.get(any)).thenAnswer(
-        (_) async => http.Response(validResponseBody, 200),
-      );
+      when(
+        mockClient.get(any),
+      ).thenAnswer((_) async => http.Response(validResponseBody, 200));
 
       final countries = await service.fetchCountries();
       expect(countries.length, 2);
@@ -205,9 +211,9 @@ void main() {
     });
 
     test('returns correct set of codes from all three categories', () async {
-      when(mockClient.get(any)).thenAnswer(
-        (_) async => http.Response(visaResponse, 200),
-      );
+      when(
+        mockClient.get(any),
+      ).thenAnswer((_) async => http.Response(visaResponse, 200));
 
       final codes = await service.fetchVisaFreeCodes('JP');
       expect(codes, containsAll(['FR', 'DE', 'TH', 'IN']));
@@ -215,9 +221,9 @@ void main() {
     });
 
     test('returns cached result on second call without HTTP request', () async {
-      when(mockClient.get(any)).thenAnswer(
-        (_) async => http.Response(visaResponse, 200),
-      );
+      when(
+        mockClient.get(any),
+      ).thenAnswer((_) async => http.Response(visaResponse, 200));
 
       await service.fetchVisaFreeCodes('JP');
       await service.fetchVisaFreeCodes('JP'); // second call → should use cache
@@ -234,9 +240,9 @@ void main() {
     });
 
     test('returns empty set on non-200 response', () async {
-      when(mockClient.get(any)).thenAnswer(
-        (_) async => http.Response('error', 500),
-      );
+      when(
+        mockClient.get(any),
+      ).thenAnswer((_) async => http.Response('error', 500));
 
       final codes = await service.fetchVisaFreeCodes('XX');
       expect(codes, isEmpty);
@@ -249,6 +255,80 @@ void main() {
       expect(codes, isEmpty);
     });
 
+    test(
+      'uses local fallback visa detail codes when API request fails',
+      () async {
+        const localFallbackBody = '''
+{
+  "countries": [
+    {
+      "code": "JP",
+      "visa_free_access": [{"code": "FR"}, {"code": "DE"}],
+      "visa_on_arrival": [{"code": "TH"}],
+      "visa_online": ["IN"]
+    }
+  ]
+}
+''';
+        service = ApiService(
+          client: mockClient,
+          localCountriesLoader: () async => localFallbackBody,
+        );
+        when(mockClient.get(any)).thenThrow(Exception('offline'));
+
+        final codes = await service.fetchVisaFreeCodes('JP');
+        expect(codes, {'FR', 'DE', 'TH', 'IN'});
+      },
+    );
+
+    test(
+      'returns empty set when local fallback has no matching country',
+      () async {
+        const localFallbackBody = '''
+{
+  "countries": [
+    {
+      "code": "US",
+      "visa_free_access": [{"code": "CA"}]
+    }
+  ]
+}
+''';
+        service = ApiService(
+          client: mockClient,
+          localCountriesLoader: () async => localFallbackBody,
+        );
+        when(mockClient.get(any)).thenThrow(Exception('offline'));
+
+        final codes = await service.fetchVisaFreeCodes('JP');
+        expect(codes, isEmpty);
+      },
+    );
+
+    test(
+      'returns empty set when local fallback has no detail code lists',
+      () async {
+        const localFallbackBody = '''
+{
+  "countries": [
+    {
+      "code": "JP",
+      "visa_free_count": 193
+    }
+  ]
+}
+''';
+        service = ApiService(
+          client: mockClient,
+          localCountriesLoader: () async => localFallbackBody,
+        );
+        when(mockClient.get(any)).thenThrow(Exception('offline'));
+
+        final codes = await service.fetchVisaFreeCodes('JP');
+        expect(codes, isEmpty);
+      },
+    );
+
     test('handles missing categories gracefully', () async {
       final partialResponse = jsonEncode({
         'visa_free_access': [
@@ -257,9 +337,9 @@ void main() {
         // visa_on_arrival and visa_online missing
       });
 
-      when(mockClient.get(any)).thenAnswer(
-        (_) async => http.Response(partialResponse, 200),
-      );
+      when(
+        mockClient.get(any),
+      ).thenAnswer((_) async => http.Response(partialResponse, 200));
 
       final codes = await service.fetchVisaFreeCodes('US');
       expect(codes, {'FR'});
@@ -282,11 +362,19 @@ void main() {
       });
 
       when(
-        mockClient.get(Uri.parse('https://api.henleypassportindex.com/api/v3/visa-single/JP')),
+        mockClient.get(
+          Uri.parse(
+            'https://api.henleypassportindex.com/api/v3/visa-single/JP',
+          ),
+        ),
       ).thenAnswer((_) async => http.Response(jpResponse, 200));
 
       when(
-        mockClient.get(Uri.parse('https://api.henleypassportindex.com/api/v3/visa-single/DE')),
+        mockClient.get(
+          Uri.parse(
+            'https://api.henleypassportindex.com/api/v3/visa-single/DE',
+          ),
+        ),
       ).thenAnswer((_) async => http.Response(deResponse, 200));
 
       final jpCodes = await service.fetchVisaFreeCodes('JP');

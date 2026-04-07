@@ -74,6 +74,66 @@ class ApiService {
     }
   }
 
+  Map<String, dynamic>? _findCountryFromLocalPayload(
+    String payload,
+    String countryCode,
+  ) {
+    try {
+      final decoded = json.decode(payload);
+      if (decoded is! Map<String, dynamic>) {
+        _logWarn("Invalid local payload: root is not a map");
+        return null;
+      }
+      final countries = decoded['countries'];
+      if (countries is! List) {
+        _logWarn("Invalid local payload: 'countries' is missing or not a list");
+        return null;
+      }
+
+      for (final item in countries) {
+        if (item is! Map<String, dynamic>) {
+          continue;
+        }
+        final code = (item['code'] ?? '').toString().toUpperCase();
+        if (code == countryCode.toUpperCase()) {
+          return item;
+        }
+      }
+    } catch (e, stackTrace) {
+      _logWarn(
+        "Failed to parse local payload for visa detail fallback",
+        error: e,
+        stackTrace: stackTrace,
+      );
+    }
+    return null;
+  }
+
+  Set<String> _extractCodesFromLocalCountry(Map<String, dynamic> country) {
+    final codes = <String>{};
+    for (final category in [
+      'visa_free_access',
+      'visa_on_arrival',
+      'visa_online',
+    ]) {
+      final items = country[category];
+      if (items is! List) {
+        continue;
+      }
+      for (final item in items) {
+        if (item is Map<String, dynamic>) {
+          final code = item['code']?.toString().toUpperCase();
+          if (code != null && code.isNotEmpty) {
+            codes.add(code);
+          }
+        } else if (item is String && item.isNotEmpty) {
+          codes.add(item.toUpperCase());
+        }
+      }
+    }
+    return codes;
+  }
+
   // 獲取所有國家清單 (一進入頁面就呼叫)
   Future<List<Country>> fetchCountries() async {
     final prefs = await SharedPreferences.getInstance();
@@ -161,6 +221,7 @@ class ApiService {
         _cache[countryCode] = codes;
         return codes;
       }
+      _logWarn("API error for visa details: ${response.statusCode}");
     } on TimeoutException catch (e, stackTrace) {
       _logError(
         "Timeout fetching visa details",
@@ -170,6 +231,39 @@ class ApiService {
     } catch (e, stackTrace) {
       _logError(
         "Error fetching visa details",
+        error: e,
+        stackTrace: stackTrace,
+      );
+    }
+
+    try {
+      final localPayload = await localCountriesLoader();
+      final localCountry = _findCountryFromLocalPayload(
+        localPayload,
+        countryCode,
+      );
+      if (localCountry == null) {
+        _logWarn(
+          "Local fallback country not found for visa details: $countryCode",
+        );
+        return {};
+      }
+
+      final fallbackCodes = _extractCodesFromLocalCountry(localCountry);
+      if (fallbackCodes.isNotEmpty) {
+        _logWarn(
+          "Using local fallback visa details from lib/data.json for $countryCode",
+        );
+        _cache[countryCode] = fallbackCodes;
+        return fallbackCodes;
+      }
+
+      _logWarn(
+        "Local fallback available but has no visa detail codes for $countryCode",
+      );
+    } catch (e, stackTrace) {
+      _logWarn(
+        "Failed to load local fallback for visa details",
         error: e,
         stackTrace: stackTrace,
       );

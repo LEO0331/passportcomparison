@@ -26,6 +26,35 @@ jobs:
       - name: Build Web
         run: flutter build web --release --base-href "/passportcomparison/"
 
+      - name: Generate AssetManifest.json compatibility file
+        run: |
+          node <<'NODE'
+          const fs = require('fs');
+          const path = require('path');
+
+          const assetsDir = path.join(process.cwd(), 'build', 'web', 'assets');
+          const outFile = path.join(assetsDir, 'AssetManifest.json');
+          const manifest = {};
+
+          function walk(dir) {
+            for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+              const fullPath = path.join(dir, entry.name);
+              if (entry.isDirectory()) {
+                walk(fullPath);
+                continue;
+              }
+              if (entry.name === 'AssetManifest.bin' || entry.name === 'AssetManifest.bin.json' || entry.name === 'AssetManifest.json') {
+                continue;
+              }
+              const relative = path.relative(assetsDir, fullPath).replaceAll(path.sep, '/');
+              manifest[relative] = [relative];
+            }
+          }
+
+          walk(assetsDir);
+          fs.writeFileSync(outFile, JSON.stringify(manifest));
+          NODE
+
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
