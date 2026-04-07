@@ -22,7 +22,7 @@
   <!-- Prefer serving CSP via HTTP headers in production; meta is a baseline fallback. -->
   <meta
     http-equiv="Content-Security-Policy"
-    content="default-src 'self'; script-src 'self'; connect-src 'self' https://api.henleypassportindex.com https://cdn.henleyglobal.com; img-src 'self' data: blob: https://cdn.henleyglobal.com; style-src 'self' 'unsafe-inline'; font-src 'self' data:; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests"
+    content="default-src 'self'; script-src 'self' https://www.gstatic.com 'unsafe-eval' 'wasm-unsafe-eval'; script-src-elem 'self' https://www.gstatic.com 'unsafe-eval' 'wasm-unsafe-eval'; connect-src 'self' https://api.henleypassportindex.com https://cdn.henleyglobal.com https://www.gstatic.com https://fonts.gstatic.com; img-src 'self' data: blob: https://cdn.henleyglobal.com https://www.gstatic.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests"
   >
 
   <!-- iOS meta tags & icons -->

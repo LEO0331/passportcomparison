@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
@@ -114,6 +115,76 @@ void main() {
       final prefs = await SharedPreferences.getInstance();
       expect(prefs.getString('cached_countries'), validResponseBody);
     });
+
+    test('returns empty when API payload root is not a map', () async {
+      when(
+        mockClient.get(any),
+      ).thenAnswer((_) async => http.Response('["invalid"]', 200));
+
+      final countries = await service.fetchCountries();
+      expect(countries, isEmpty);
+    });
+
+    test('returns empty when API payload countries is not a list', () async {
+      when(mockClient.get(any)).thenAnswer(
+        (_) async => http.Response('{"countries":{"code":"JP"}}', 200),
+      );
+
+      final countries = await service.fetchCountries();
+      expect(countries, isEmpty);
+    });
+
+    test('returns empty when API payload is invalid json', () async {
+      when(
+        mockClient.get(any),
+      ).thenAnswer((_) async => http.Response('{"countries":', 200));
+
+      final countries = await service.fetchCountries();
+      expect(countries, isEmpty);
+    });
+
+    test('handles timeout exception by falling back to local loader', () async {
+      const localFallbackBody =
+          '{"countries":[{"code":"FR","country":"France","region":"Europe","openness":80.0,"has_data":true,"data":{"2024":180}}]}';
+
+      service = ApiService(
+        client: mockClient,
+        localCountriesLoader: () async => localFallbackBody,
+      );
+      when(mockClient.get(any)).thenThrow(TimeoutException('timeout'));
+
+      final countries = await service.fetchCountries();
+      expect(countries.length, 1);
+      expect(countries.first.code, 'FR');
+    });
+
+    test('falls through unusable cache to local loader', () async {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString('cached_countries', '{"countries":{"bad":true}}');
+      const localFallbackBody =
+          '{"countries":[{"code":"IT","country":"Italy","region":"Europe","openness":77.0,"has_data":true,"data":{"2024":178}}]}';
+
+      service = ApiService(
+        client: mockClient,
+        localCountriesLoader: () async => localFallbackBody,
+      );
+      when(mockClient.get(any)).thenThrow(Exception('No internet'));
+
+      final countries = await service.fetchCountries();
+      expect(countries.length, 1);
+      expect(countries.first.code, 'IT');
+    });
+
+    test('can use default constructor loader path when API succeeds', () async {
+      service = ApiService(client: mockClient);
+      when(mockClient.get(any)).thenAnswer(
+        (_) async => http.Response(validResponseBody, 200),
+      );
+
+      final countries = await service.fetchCountries();
+      expect(countries.length, 2);
+      expect(countries.first.code, 'JP');
+    });
   });
 
   // ---------------------------------------------------------------------------
@@ -166,6 +237,13 @@ void main() {
       when(mockClient.get(any)).thenAnswer(
         (_) async => http.Response('error', 500),
       );
+
+      final codes = await service.fetchVisaFreeCodes('XX');
+      expect(codes, isEmpty);
+    });
+
+    test('returns empty set on timeout exception', () async {
+      when(mockClient.get(any)).thenThrow(TimeoutException('timeout'));
 
       final codes = await service.fetchVisaFreeCodes('XX');
       expect(codes, isEmpty);
