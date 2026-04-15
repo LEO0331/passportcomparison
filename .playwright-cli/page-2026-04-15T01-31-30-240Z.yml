@@ -1,0 +1,38 @@
+- generic [ref=e5] [cursor=pointer]:
+  - generic:
+    - generic:
+      - generic:
+        - generic:
+          - menu "Popup menu":
+            - generic:
+              - group:
+                - menuitem "Afghanistan" [active] [ref=e28]
+                - menuitem "Albania" [ref=e29]
+                - menuitem "Algeria" [ref=e30]
+                - menuitem "Angola" [ref=e31]
+                - menuitem "Anguilla" [ref=e32]
+                - menuitem "Antigua and Barbuda" [ref=e33]
+                - menuitem "Argentina" [ref=e34]
+                - menuitem "Armenia" [ref=e35]
+                - menuitem "Aruba" [ref=e36]
+                - menuitem "Australia" [ref=e37]
+                - menuitem "Austria" [ref=e38]
+                - menuitem "Azerbaijan" [ref=e39]
+                - menuitem "The Bahamas" [ref=e40]
+                - menuitem "Bahrain" [ref=e41]
+                - menuitem "Bangladesh" [ref=e42]
+                - menuitem "Barbados" [ref=e43]
+                - menuitem "Belarus" [ref=e44]
+                - menuitem "Belgium" [ref=e45]
+                - menuitem "Belize" [ref=e46]
+                - menuitem "Benin" [ref=e47]
+                - menuitem "Bermuda" [ref=e48]
+                - menuitem "Bhutan" [ref=e49]
+                - menuitem "Bolivia" [ref=e50]
+                - menuitem "Bonaire; St. Eustatius and Saba" [ref=e51]
+                - menuitem "Bosnia and Herzegovina" [ref=e52]
+                - menuitem "Botswana" [ref=e53]
+                - menuitem "Brazil" [ref=e54]
+                - menuitem "Brunei" [ref=e55]
+                - menuitem "Bulgaria" [ref=e56]
+        - button "Dismiss" [ref=e57]

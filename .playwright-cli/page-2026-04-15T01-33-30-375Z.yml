@@ -1,0 +1,19 @@
+- generic [ref=e5]:
+  - generic:
+    - generic:
+      - generic:
+        - generic [ref=e127]:
+          - alertdialog:
+            - generic:
+              - generic: Save to Favorites
+            - generic:
+              - generic:
+                - generic: "Enter a name for this comparison:"
+              - generic [ref=e128]:
+                - textbox "Comparison Title" [active] [ref=e129]:
+                  - /placeholder: e.g. My Summer Trip
+                  - text: Brazil vs Belgium
+                - button [ref=e130]
+            - button "Cancel" [ref=e131]
+            - button "Save" [ref=e132]
+        - button "Dismiss" [ref=e133]

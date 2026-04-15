@@ -1,0 +1,63 @@
+- generic [ref=e5] [cursor=pointer]:
+  - generic:
+    - generic:
+      - generic:
+        - generic:
+          - generic:
+            - generic:
+              - button "Open navigation menu" [ref=e106]
+              - heading "Passport Comparison" [level=2]
+              - button "switch modes" [ref=e107]
+            - group:
+              - generic:
+                - generic: Passport Atlas
+              - generic:
+                - generic: Model mobility strength, compare access patterns, and export shareable reports.
+              - generic:
+                - generic: How many passports to compare today? (Max 5)
+              - button "1" [disabled] [ref=e108]
+              - button "2" [disabled] [ref=e109]
+              - button "3" [disabled] [ref=e110]
+              - button "4" [disabled] [ref=e111]
+              - button "5" [disabled] [ref=e112]
+              - button "Brazil" [ref=e113]
+              - button "2026" [ref=e114]
+              - button "Belgium" [ref=e115]
+              - button "2026" [ref=e116]
+              - button "Compare" [active] [ref=e117]
+              - button "Details" [ref=e118]
+              - button "Add to Favorite" [ref=e119]
+              - button "Reset All" [ref=e120]
+              - button "Share Screenshot" [ref=e121]
+              - button "Export Full PDF" [ref=e122]
+              - button "Export Differences Only PDF" [ref=e123]
+              - generic:
+                - generic: Brazil
+              - generic:
+                - generic: Belgium
+              - generic:
+                - generic: AMERICAS
+              - generic:
+                - generic: EUROPE
+              - generic:
+                - generic: "Year: 2026"
+              - generic:
+                - generic: "Year: 2026"
+              - generic:
+                - generic: "Rank: 15"
+              - generic:
+                - generic: "Rank: 4"
+              - generic:
+                - generic: "Visa Free: 168"
+              - generic:
+                - generic: "Visa Free: 185"
+              - generic:
+                - generic: Openness
+              - generic:
+                - generic: "22.6"
+              - generic:
+                - generic: Openness
+              - generic:
+                - generic: "22.6"
+              - progressbar "23"
+              - progressbar "23"

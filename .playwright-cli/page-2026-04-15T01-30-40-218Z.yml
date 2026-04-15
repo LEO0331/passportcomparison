@@ -1,0 +1,23 @@
+- generic [ref=e5]:
+  - generic:
+    - generic:
+      - generic:
+        - generic:
+          - generic:
+            - generic:
+              - button "Open navigation menu" [active] [ref=e9]
+              - heading "Passport Comparison" [level=2]
+              - button "switch modes" [ref=e10]
+            - group:
+              - generic:
+                - generic: Passport Atlas
+              - generic:
+                - generic: Model mobility strength, compare access patterns, and export shareable reports.
+              - generic:
+                - generic: How many passports to compare today? (Max 5)
+              - button "1" [ref=e11]
+              - button "2" [ref=e12]
+              - button "3" [ref=e13]
+              - button "4" [ref=e14]
+              - button "5" [ref=e15]
+              - button "Start" [ref=e16]

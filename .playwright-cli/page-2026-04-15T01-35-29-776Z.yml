@@ -1,0 +1,12 @@
+- generic [ref=e5]:
+  - generic:
+    - generic:
+      - generic:
+        - generic:
+          - generic:
+            - generic:
+              - generic:
+                - generic [active]: Passport Index Toolbox
+              - button "Home" [ref=e162]
+              - button "Favorites" [ref=e163]
+            - button "Dismiss" [ref=e164]

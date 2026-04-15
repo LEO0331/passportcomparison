@@ -1,0 +1,31 @@
+- generic [ref=e3]:
+  - generic [ref=e4]:
+    - generic [ref=e5]:
+      - generic [ref=e6]: Leave Atelier
+      - paragraph [ref=e7]: Approvals that feel less like admin, more like orchestration.
+      - paragraph [ref=e8]: A designer-led leave workflow with intelligent validation, crisp reporting, and a dashboard your team will actually enjoy opening.
+    - generic [ref=e9]:
+      - generic [ref=e10]:
+        - heading "First Version Ready" [level=4] [ref=e11]
+        - paragraph [ref=e12]: Validate leave rules, track balance, process approvals, and export polished reports from one unified control room.
+        - generic [ref=e13]:
+          - button "Enter Dashboard" [ref=e14] [cursor=pointer]:
+            - text: Enter Dashboard
+            - img [ref=e16]
+          - link "Review Privacy & Security" [ref=e18] [cursor=pointer]:
+            - /url: privacy-security.html
+      - generic [ref=e19]:
+        - generic [ref=e20]:
+          - text: Total Requests
+          - heading "10,000" [level=3] [ref=e21]
+        - generic [ref=e22]:
+          - text: Awaiting Decision
+          - heading "3,368" [level=3] [ref=e23]
+        - generic [ref=e24]:
+          - text: Active Contributors
+          - heading "10" [level=3] [ref=e25]
+  - generic [ref=e27]:
+    - text: By using this app, you agree to our
+    - link "Privacy & Security Policy" [ref=e28] [cursor=pointer]:
+      - /url: privacy-security.html
+    - text: .

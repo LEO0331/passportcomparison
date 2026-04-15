@@ -1,0 +1,33 @@
+- generic [ref=e5]:
+  - generic:
+    - generic:
+      - generic:
+        - generic:
+          - generic:
+            - generic:
+              - button "Open navigation menu" [ref=e58]
+              - heading "Passport Comparison" [level=2]
+              - button "switch modes" [ref=e59]
+            - group:
+              - generic:
+                - generic: Passport Atlas
+              - generic:
+                - generic: Model mobility strength, compare access patterns, and export shareable reports.
+              - generic:
+                - generic: How many passports to compare today? (Max 5)
+              - button "1" [disabled] [ref=e60]
+              - button "2" [disabled] [ref=e61]
+              - button "3" [disabled] [ref=e62]
+              - button "4" [disabled] [ref=e63]
+              - button "5" [disabled] [ref=e64]
+              - button "Brazil" [active] [ref=e65]
+              - button "2026" [ref=e66]
+              - button "Passport 2" [ref=e67]
+              - button "2026" [ref=e68]
+              - button "Compare" [disabled] [ref=e69]
+              - button "Details" [disabled] [ref=e70]
+              - button "Add to Favorite" [disabled] [ref=e71]
+              - button "Reset All" [ref=e72]
+              - button "Share Screenshot" [disabled] [ref=e73]
+              - button "Export Full PDF" [disabled] [ref=e74]
+              - button "Export Differences Only PDF" [disabled] [ref=e75]

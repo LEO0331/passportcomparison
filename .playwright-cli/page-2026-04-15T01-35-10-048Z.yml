@@ -1,0 +1,14 @@
+- generic [ref=e5]:
+  - generic:
+    - generic:
+      - generic:
+        - generic:
+          - generic:
+            - generic:
+              - button "Open navigation menu" [active] [ref=e158]
+              - heading "My Favorites" [level=2]
+              - button "switch modes" [ref=e159]
+            - generic:
+              - group:
+                - 'group "Brazil vs Belgium Saved on: 2026-04-15 09:33" [ref=e160]':
+                  - button [ref=e161]

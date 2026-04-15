@@ -48,6 +48,31 @@ This toolbox focuses on a clean, fast, and intuitive interface to compare visa-f
     ```bash
     flutter run -d chrome
 
+## 🧪 End-to-End (Playwright CLI)
+
+This repository includes a real browser E2E flow script that covers:
+- home load
+- two-passport compare flow
+- details/search interaction
+- add-to-favorites
+- favorites persistence check
+
+### Run locally
+
+1. Build web app:
+   ```bash
+   flutter build web --release
+   ```
+2. Serve built app:
+   ```bash
+   cd build/web
+   python3 -m http.server 8787
+   ```
+3. In another terminal, run E2E flow:
+   ```bash
+   ./scripts/e2e/playwright_user_flow.sh http://127.0.0.1:8787
+   ```
+
 ## 📺 Demonstration
 
 ### 1. Comparison Flow
