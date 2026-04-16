@@ -1,4 +1,3 @@
-// Use HTML renderer to keep text selectable/translate-friendly in browsers.
-window.flutterConfiguration = {
-  renderer: "html",
-};
+// Intentionally left blank.
+// `window.flutterConfiguration` is deprecated and conflicts with newer Flutter
+// web bootstrap in Patrol/Playwright runs.

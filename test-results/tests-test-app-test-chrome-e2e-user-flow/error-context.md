@@ -1,0 +1,991 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e4]:
+  - generic:
+    - generic:
+      - generic:
+        - generic:
+          - generic:
+            - generic:
+              - button "Open navigation menu" [ref=e5]
+              - heading "Passport Comparison" [level=2]
+              - button "switch modes" [ref=e6]
+            - group:
+              - generic:
+                - generic: Passport Atlas
+              - generic:
+                - generic: Model mobility strength, compare access patterns, and export shareable reports.
+              - generic:
+                - generic: How many passports to compare today? (Max 5)
+              - button "1" [disabled] [ref=e7]
+              - button "2" [disabled] [ref=e8]
+              - button "3" [disabled] [ref=e9]
+              - button "4" [disabled] [ref=e10]
+              - button "5" [disabled] [ref=e11]
+              - button "Afghanistan" [ref=e12]
+              - button "2026" [ref=e13]
+              - button "Albania" [active] [ref=e14]
+              - button "2026" [ref=e15]
+              - button "Compare" [ref=e16]
+              - button "Details" [ref=e17]
+              - button "Add to Favorite" [ref=e18]
+              - button "Reset All" [ref=e19]
+              - button "Share Screenshot" [ref=e20]
+              - button "Export Full PDF" [ref=e21]
+              - button "Export Differences Only PDF" [ref=e22]
+              - generic:
+                - generic: Afghanistan
+              - generic:
+                - generic: Albania
+              - generic:
+                - generic: ASIA
+              - generic:
+                - generic: EUROPE
+              - generic:
+                - generic: "Year: 2026"
+              - generic:
+                - generic: "Year: 2026"
+              - generic:
+                - generic: "Rank: 101"
+              - generic:
+                - generic: "Rank: 40"
+              - generic:
+                - generic: "Visa Free: 23"
+              - generic:
+                - generic: "Visa Free: 121"
+              - generic:
+                - generic: Openness
+              - generic:
+                - generic: "22.6"
+              - generic:
+                - generic: Openness
+              - generic:
+                - generic: "22.6"
+              - progressbar "23"
+              - progressbar "23"
+              - generic:
+                - generic: Detailed Access Comparison
+              - textbox "Search destination..." [ref=e24]
+              - checkbox "Diff Only" [ref=e25]
+              - table:
+                - row "Destination Afghanistan Albania":
+                  - cell "Destination":
+                    - generic:
+                      - generic: Destination
+                  - cell "Afghanistan":
+                    - generic:
+                      - generic: Afghanistan
+                  - cell "Albania":
+                    - generic:
+                      - generic: Albania
+              - table:
+                - row "Afghanistan":
+                  - cell "Afghanistan":
+                    - generic:
+                      - generic: Afghanistan
+                - row "Albania":
+                  - cell "Albania":
+                    - generic:
+                      - generic: Albania
+                - row "Algeria":
+                  - cell "Algeria":
+                    - generic:
+                      - generic: Algeria
+                - row "Angola":
+                  - cell "Angola":
+                    - generic:
+                      - generic: Angola
+                - row "Anguilla":
+                  - cell "Anguilla":
+                    - generic:
+                      - generic: Anguilla
+                - row "Antigua and Barbuda":
+                  - cell "Antigua and Barbuda":
+                    - generic:
+                      - generic: Antigua and Barbuda
+                - row "Argentina":
+                  - cell "Argentina":
+                    - generic:
+                      - generic: Argentina
+                - row "Armenia":
+                  - cell "Armenia":
+                    - generic:
+                      - generic: Armenia
+                - row "Aruba":
+                  - cell "Aruba":
+                    - generic:
+                      - generic: Aruba
+                - row "Australia":
+                  - cell "Australia":
+                    - generic:
+                      - generic: Australia
+                - row "Austria":
+                  - cell "Austria":
+                    - generic:
+                      - generic: Austria
+                - row "Azerbaijan":
+                  - cell "Azerbaijan":
+                    - generic:
+                      - generic: Azerbaijan
+                - row "The Bahamas":
+                  - cell "The Bahamas":
+                    - generic:
+                      - generic: The Bahamas
+                - row "Bahrain":
+                  - cell "Bahrain":
+                    - generic:
+                      - generic: Bahrain
+                - row "Bangladesh":
+                  - cell "Bangladesh":
+                    - generic:
+                      - generic: Bangladesh
+                - row "Barbados":
+                  - cell "Barbados":
+                    - generic:
+                      - generic: Barbados
+                - row "Belarus":
+                  - cell "Belarus":
+                    - generic:
+                      - generic: Belarus
+                - row "Belgium":
+                  - cell "Belgium":
+                    - generic:
+                      - generic: Belgium
+                - row "Belize":
+                  - cell "Belize":
+                    - generic:
+                      - generic: Belize
+                - row "Benin":
+                  - cell "Benin":
+                    - generic:
+                      - generic: Benin
+                - row "Bermuda":
+                  - cell "Bermuda":
+                    - generic:
+                      - generic: Bermuda
+                - row "Bhutan":
+                  - cell "Bhutan":
+                    - generic:
+                      - generic: Bhutan
+                - row "Bolivia":
+                  - cell "Bolivia":
+                    - generic:
+                      - generic: Bolivia
+                - row "Bonaire; St. Eustatius and Saba":
+                  - cell "Bonaire; St. Eustatius and Saba":
+                    - generic:
+                      - generic: Bonaire; St. Eustatius and Saba
+                - row "Bosnia and Herzegovina":
+                  - cell "Bosnia and Herzegovina":
+                    - generic:
+                      - generic: Bosnia and Herzegovina
+                - row "Botswana":
+                  - cell "Botswana":
+                    - generic:
+                      - generic: Botswana
+                - row "Brazil":
+                  - cell "Brazil":
+                    - generic:
+                      - generic: Brazil
+                - row "Brunei":
+                  - cell "Brunei":
+                    - generic:
+                      - generic: Brunei
+                - row "Bulgaria":
+                  - cell "Bulgaria":
+                    - generic:
+                      - generic: Bulgaria
+                - row "Burkina Faso":
+                  - cell "Burkina Faso":
+                    - generic:
+                      - generic: Burkina Faso
+                - row "Burundi":
+                  - cell "Burundi":
+                    - generic:
+                      - generic: Burundi
+                - row "Cambodia":
+                  - cell "Cambodia":
+                    - generic:
+                      - generic: Cambodia
+                - row "Cameroon":
+                  - cell "Cameroon":
+                    - generic:
+                      - generic: Cameroon
+                - row "Canada":
+                  - cell "Canada":
+                    - generic:
+                      - generic: Canada
+                - row "Cape Verde Islands":
+                  - cell "Cape Verde Islands":
+                    - generic:
+                      - generic: Cape Verde Islands
+                - row "Cayman Islands":
+                  - cell "Cayman Islands":
+                    - generic:
+                      - generic: Cayman Islands
+                - row "Central African Republic":
+                  - cell "Central African Republic":
+                    - generic:
+                      - generic: Central African Republic
+                - row "Chad":
+                  - cell "Chad":
+                    - generic:
+                      - generic: Chad
+                - row "Chile":
+                  - cell "Chile":
+                    - generic:
+                      - generic: Chile
+                - row "China":
+                  - cell "China":
+                    - generic:
+                      - generic: China
+                - row "Colombia":
+                  - cell "Colombia":
+                    - generic:
+                      - generic: Colombia
+                - row "Comoro Islands":
+                  - cell "Comoro Islands":
+                    - generic:
+                      - generic: Comoro Islands
+                - row "Congo (Rep.)":
+                  - cell "Congo (Rep.)":
+                    - generic:
+                      - generic: Congo (Rep.)
+                - row "Congo (Dem. Rep.)":
+                  - cell "Congo (Dem. Rep.)":
+                    - generic:
+                      - generic: Congo (Dem. Rep.)
+                - row "Cook Islands":
+                  - cell "Cook Islands":
+                    - generic:
+                      - generic: Cook Islands
+                - row "Costa Rica":
+                  - cell "Costa Rica":
+                    - generic:
+                      - generic: Costa Rica
+                - row "Côte d'Ivoire":
+                  - cell "Côte d'Ivoire":
+                    - generic:
+                      - generic: Côte d'Ivoire
+                - row "Croatia":
+                  - cell "Croatia":
+                    - generic:
+                      - generic: Croatia
+                - row "Cuba":
+                  - cell "Cuba":
+                    - generic:
+                      - generic: Cuba
+                - row "Curacao":
+                  - cell "Curacao":
+                    - generic:
+                      - generic: Curacao
+                - row "Cyprus":
+                  - cell "Cyprus":
+                    - generic:
+                      - generic: Cyprus
+                - row "Czechia":
+                  - cell "Czechia":
+                    - generic:
+                      - generic: Czechia
+                - row "Denmark":
+                  - cell "Denmark":
+                    - generic:
+                      - generic: Denmark
+                - row "Djibouti":
+                  - cell "Djibouti":
+                    - generic:
+                      - generic: Djibouti
+                - row "Dominica":
+                  - cell "Dominica":
+                    - generic:
+                      - generic: Dominica
+                - row "Dominican Republic":
+                  - cell "Dominican Republic":
+                    - generic:
+                      - generic: Dominican Republic
+                - row "Ecuador":
+                  - cell "Ecuador":
+                    - generic:
+                      - generic: Ecuador
+                - row "Egypt":
+                  - cell "Egypt":
+                    - generic:
+                      - generic: Egypt
+                - row "El Salvador":
+                  - cell "El Salvador":
+                    - generic:
+                      - generic: El Salvador
+                - row "Equatorial Guinea":
+                  - cell "Equatorial Guinea":
+                    - generic:
+                      - generic: Equatorial Guinea
+                - row "Eritrea":
+                  - cell "Eritrea":
+                    - generic:
+                      - generic: Eritrea
+                - row "Estonia":
+                  - cell "Estonia":
+                    - generic:
+                      - generic: Estonia
+                - row "Ethiopia":
+                  - cell "Ethiopia":
+                    - generic:
+                      - generic: Ethiopia
+                - row "Falkland Islands":
+                  - cell "Falkland Islands":
+                    - generic:
+                      - generic: Falkland Islands
+                - row "Fiji":
+                  - cell "Fiji":
+                    - generic:
+                      - generic: Fiji
+                - row "Finland":
+                  - cell "Finland":
+                    - generic:
+                      - generic: Finland
+                - row "France":
+                  - cell "France":
+                    - generic:
+                      - generic: France
+                - row "French Guiana":
+                  - cell "French Guiana":
+                    - generic:
+                      - generic: French Guiana
+                - row "French Polynesia":
+                  - cell "French Polynesia":
+                    - generic:
+                      - generic: French Polynesia
+                - row "French West Indies":
+                  - cell "French West Indies":
+                    - generic:
+                      - generic: French West Indies
+                - row "Gabon":
+                  - cell "Gabon":
+                    - generic:
+                      - generic: Gabon
+                - row "The Gambia":
+                  - cell "The Gambia":
+                    - generic:
+                      - generic: The Gambia
+                - row "Georgia":
+                  - cell "Georgia":
+                    - generic:
+                      - generic: Georgia
+                - row "Germany":
+                  - cell "Germany":
+                    - generic:
+                      - generic: Germany
+                - row "Ghana":
+                  - cell "Ghana":
+                    - generic:
+                      - generic: Ghana
+                - row "Gibraltar":
+                  - cell "Gibraltar":
+                    - generic:
+                      - generic: Gibraltar
+                - row "Greece":
+                  - cell "Greece":
+                    - generic:
+                      - generic: Greece
+                - row "Grenada":
+                  - cell "Grenada":
+                    - generic:
+                      - generic: Grenada
+                - row "Guam":
+                  - cell "Guam":
+                    - generic:
+                      - generic: Guam
+                - row "Guatemala":
+                  - cell "Guatemala":
+                    - generic:
+                      - generic: Guatemala
+                - row "Guinea":
+                  - cell "Guinea":
+                    - generic:
+                      - generic: Guinea
+                - row "Guinea-Bissau":
+                  - cell "Guinea-Bissau":
+                    - generic:
+                      - generic: Guinea-Bissau
+                - row "Guyana":
+                  - cell "Guyana":
+                    - generic:
+                      - generic: Guyana
+                - row "Haiti":
+                  - cell "Haiti":
+                    - generic:
+                      - generic: Haiti
+                - row "Honduras":
+                  - cell "Honduras":
+                    - generic:
+                      - generic: Honduras
+                - row "Hong Kong (SAR China)":
+                  - cell "Hong Kong (SAR China)":
+                    - generic:
+                      - generic: Hong Kong (SAR China)
+                - row "Hungary":
+                  - cell "Hungary":
+                    - generic:
+                      - generic: Hungary
+                - row "Iceland":
+                  - cell "Iceland":
+                    - generic:
+                      - generic: Iceland
+                - row "India":
+                  - cell "India":
+                    - generic:
+                      - generic: India
+                - row "Indonesia":
+                  - cell "Indonesia":
+                    - generic:
+                      - generic: Indonesia
+                - row "Iran":
+                  - cell "Iran":
+                    - generic:
+                      - generic: Iran
+                - row "Iraq":
+                  - cell "Iraq":
+                    - generic:
+                      - generic: Iraq
+                - row "Ireland":
+                  - cell "Ireland":
+                    - generic:
+                      - generic: Ireland
+                - row "Israel":
+                  - cell "Israel":
+                    - generic:
+                      - generic: Israel
+                - row "Italy":
+                  - cell "Italy":
+                    - generic:
+                      - generic: Italy
+                - row "Jamaica":
+                  - cell "Jamaica":
+                    - generic:
+                      - generic: Jamaica
+                - row "Japan":
+                  - cell "Japan":
+                    - generic:
+                      - generic: Japan
+                - row "Jordan":
+                  - cell "Jordan":
+                    - generic:
+                      - generic: Jordan
+                - row "Kazakhstan":
+                  - cell "Kazakhstan":
+                    - generic:
+                      - generic: Kazakhstan
+                - row "Kenya":
+                  - cell "Kenya":
+                    - generic:
+                      - generic: Kenya
+                - row "Kiribati":
+                  - cell "Kiribati":
+                    - generic:
+                      - generic: Kiribati
+                - row "Kosovo":
+                  - cell "Kosovo":
+                    - generic:
+                      - generic: Kosovo
+                - row "Kuwait":
+                  - cell "Kuwait":
+                    - generic:
+                      - generic: Kuwait
+                - row "Kyrgyzstan":
+                  - cell "Kyrgyzstan":
+                    - generic:
+                      - generic: Kyrgyzstan
+                - row "Laos":
+                  - cell "Laos":
+                    - generic:
+                      - generic: Laos
+                - row "Latvia":
+                  - cell "Latvia":
+                    - generic:
+                      - generic: Latvia
+                - row "Lebanon":
+                  - cell "Lebanon":
+                    - generic:
+                      - generic: Lebanon
+                - row "Lesotho":
+                  - cell "Lesotho":
+                    - generic:
+                      - generic: Lesotho
+                - row "Liberia":
+                  - cell "Liberia":
+                    - generic:
+                      - generic: Liberia
+                - row "Libya":
+                  - cell "Libya":
+                    - generic:
+                      - generic: Libya
+                - row "Lithuania":
+                  - cell "Lithuania":
+                    - generic:
+                      - generic: Lithuania
+                - row "Luxembourg":
+                  - cell "Luxembourg":
+                    - generic:
+                      - generic: Luxembourg
+                - row "Macao (SAR China)":
+                  - cell "Macao (SAR China)":
+                    - generic:
+                      - generic: Macao (SAR China)
+                - row "North Macedonia":
+                  - cell "North Macedonia":
+                    - generic:
+                      - generic: North Macedonia
+                - row "Madagascar":
+                  - cell "Madagascar":
+                    - generic:
+                      - generic: Madagascar
+                - row "Malawi":
+                  - cell "Malawi":
+                    - generic:
+                      - generic: Malawi
+                - row "Malaysia":
+                  - cell "Malaysia":
+                    - generic:
+                      - generic: Malaysia
+                - row "Maldives":
+                  - cell "Maldives":
+                    - generic:
+                      - generic: Maldives
+                - row "Mali":
+                  - cell "Mali":
+                    - generic:
+                      - generic: Mali
+                - row "Malta":
+                  - cell "Malta":
+                    - generic:
+                      - generic: Malta
+                - row "Marshall Islands":
+                  - cell "Marshall Islands":
+                    - generic:
+                      - generic: Marshall Islands
+                - row "Mauritania":
+                  - cell "Mauritania":
+                    - generic:
+                      - generic: Mauritania
+                - row "Mauritius":
+                  - cell "Mauritius":
+                    - generic:
+                      - generic: Mauritius
+                - row "Mayotte":
+                  - cell "Mayotte":
+                    - generic:
+                      - generic: Mayotte
+                - row "Mexico":
+                  - cell "Mexico":
+                    - generic:
+                      - generic: Mexico
+                - row "Micronesia":
+                  - cell "Micronesia":
+                    - generic:
+                      - generic: Micronesia
+                - row "Moldova":
+                  - cell "Moldova":
+                    - generic:
+                      - generic: Moldova
+                - row "Mongolia":
+                  - cell "Mongolia":
+                    - generic:
+                      - generic: Mongolia
+                - row "Montenegro":
+                  - cell "Montenegro":
+                    - generic:
+                      - generic: Montenegro
+                - row "Montserrat":
+                  - cell "Montserrat":
+                    - generic:
+                      - generic: Montserrat
+                - row "Morocco":
+                  - cell "Morocco":
+                    - generic:
+                      - generic: Morocco
+                - row "Mozambique":
+                  - cell "Mozambique":
+                    - generic:
+                      - generic: Mozambique
+                - row "Myanmar":
+                  - cell "Myanmar":
+                    - generic:
+                      - generic: Myanmar
+                - row "Namibia":
+                  - cell "Namibia":
+                    - generic:
+                      - generic: Namibia
+                - row "Nauru":
+                  - cell "Nauru":
+                    - generic:
+                      - generic: Nauru
+                - row "Nepal":
+                  - cell "Nepal":
+                    - generic:
+                      - generic: Nepal
+                - row "Netherlands":
+                  - cell "Netherlands":
+                    - generic:
+                      - generic: Netherlands
+                - row "New Caledonia":
+                  - cell "New Caledonia":
+                    - generic:
+                      - generic: New Caledonia
+                - row "New Zealand":
+                  - cell "New Zealand":
+                    - generic:
+                      - generic: New Zealand
+                - row "Nicaragua":
+                  - cell "Nicaragua":
+                    - generic:
+                      - generic: Nicaragua
+                - row "Niger":
+                  - cell "Niger":
+                    - generic:
+                      - generic: Niger
+                - row "Nigeria":
+                  - cell "Nigeria":
+                    - generic:
+                      - generic: Nigeria
+                - row "North Korea":
+                  - cell "North Korea":
+                    - generic:
+                      - generic: North Korea
+                - row "Niue":
+                  - cell "Niue":
+                    - generic:
+                      - generic: Niue
+                - row "Northern Mariana Islands":
+                  - cell "Northern Mariana Islands":
+                    - generic:
+                      - generic: Northern Mariana Islands
+                - row "Norway":
+                  - cell "Norway":
+                    - generic:
+                      - generic: Norway
+                - row "Oman":
+                  - cell "Oman":
+                    - generic:
+                      - generic: Oman
+                - row "Pakistan":
+                  - cell "Pakistan":
+                    - generic:
+                      - generic: Pakistan
+                - row "Palau Islands":
+                  - cell "Palau Islands":
+                    - generic:
+                      - generic: Palau Islands
+                - row "Panama":
+                  - cell "Panama":
+                    - generic:
+                      - generic: Panama
+                - row "Papua New Guinea":
+                  - cell "Papua New Guinea":
+                    - generic:
+                      - generic: Papua New Guinea
+                - row "Paraguay":
+                  - cell "Paraguay":
+                    - generic:
+                      - generic: Paraguay
+                - row "Peru":
+                  - cell "Peru":
+                    - generic:
+                      - generic: Peru
+                - row "Philippines":
+                  - cell "Philippines":
+                    - generic:
+                      - generic: Philippines
+                - row "Poland":
+                  - cell "Poland":
+                    - generic:
+                      - generic: Poland
+                - row "Portugal":
+                  - cell "Portugal":
+                    - generic:
+                      - generic: Portugal
+                - row "Puerto Rico":
+                  - cell "Puerto Rico":
+                    - generic:
+                      - generic: Puerto Rico
+                - row "Qatar":
+                  - cell "Qatar":
+                    - generic:
+                      - generic: Qatar
+                - row "Reunion":
+                  - cell "Reunion":
+                    - generic:
+                      - generic: Reunion
+                - row "Romania":
+                  - cell "Romania":
+                    - generic:
+                      - generic: Romania
+                - row "Russian Federation":
+                  - cell "Russian Federation":
+                    - generic:
+                      - generic: Russian Federation
+                - row "Rwanda":
+                  - cell "Rwanda":
+                    - generic:
+                      - generic: Rwanda
+                - row "Samoa":
+                  - cell "Samoa":
+                    - generic:
+                      - generic: Samoa
+                - row "American Samoa":
+                  - cell "American Samoa":
+                    - generic:
+                      - generic: American Samoa
+                - row "São Tomé and Príncipe":
+                  - cell "São Tomé and Príncipe":
+                    - generic:
+                      - generic: São Tomé and Príncipe
+                - row "Saudi Arabia":
+                  - cell "Saudi Arabia":
+                    - generic:
+                      - generic: Saudi Arabia
+                - row "Senegal":
+                  - cell "Senegal":
+                    - generic:
+                      - generic: Senegal
+                - row "Serbia":
+                  - cell "Serbia":
+                    - generic:
+                      - generic: Serbia
+                - row "Seychelles":
+                  - cell "Seychelles":
+                    - generic:
+                      - generic: Seychelles
+                - row "Sierra Leone":
+                  - cell "Sierra Leone":
+                    - generic:
+                      - generic: Sierra Leone
+                - row "Singapore":
+                  - cell "Singapore":
+                    - generic:
+                      - generic: Singapore
+                - row "Slovakia":
+                  - cell "Slovakia":
+                    - generic:
+                      - generic: Slovakia
+                - row "Slovenia":
+                  - cell "Slovenia":
+                    - generic:
+                      - generic: Slovenia
+                - row "Solomon Islands":
+                  - cell "Solomon Islands":
+                    - generic:
+                      - generic: Solomon Islands
+                - row "Somalia":
+                  - cell "Somalia":
+                    - generic:
+                      - generic: Somalia
+                - row "South Africa":
+                  - cell "South Africa":
+                    - generic:
+                      - generic: South Africa
+                - row "South Korea":
+                  - cell "South Korea":
+                    - generic:
+                      - generic: South Korea
+                - row "South Sudan":
+                  - cell "South Sudan":
+                    - generic:
+                      - generic: South Sudan
+                - row "Spain":
+                  - cell "Spain":
+                    - generic:
+                      - generic: Spain
+                - row "Sri Lanka":
+                  - cell "Sri Lanka":
+                    - generic:
+                      - generic: Sri Lanka
+                - row "St. Helena":
+                  - cell "St. Helena":
+                    - generic:
+                      - generic: St. Helena
+                - row "St. Kitts and Nevis":
+                  - cell "St. Kitts and Nevis":
+                    - generic:
+                      - generic: St. Kitts and Nevis
+                - row "St. Lucia":
+                  - cell "St. Lucia":
+                    - generic:
+                      - generic: St. Lucia
+                - row "St. Maarten":
+                  - cell "St. Maarten":
+                    - generic:
+                      - generic: St. Maarten
+                - row "St. Vincent and the Grenadines":
+                  - cell "St. Vincent and the Grenadines":
+                    - generic:
+                      - generic: St. Vincent and the Grenadines
+                - row "Sudan":
+                  - cell "Sudan":
+                    - generic:
+                      - generic: Sudan
+                - row "Suriname":
+                  - cell "Suriname":
+                    - generic:
+                      - generic: Suriname
+                - row "eSwatini":
+                  - cell "eSwatini":
+                    - generic:
+                      - generic: eSwatini
+                - row "Sweden":
+                  - cell "Sweden":
+                    - generic:
+                      - generic: Sweden
+                - row "Switzerland":
+                  - cell "Switzerland":
+                    - generic:
+                      - generic: Switzerland
+                - row "Syria":
+                  - cell "Syria":
+                    - generic:
+                      - generic: Syria
+                - row "Taiwan (Chinese Taipei)":
+                  - cell "Taiwan (Chinese Taipei)":
+                    - generic:
+                      - generic: Taiwan (Chinese Taipei)
+                - row "Tajikistan":
+                  - cell "Tajikistan":
+                    - generic:
+                      - generic: Tajikistan
+                - row "Tanzania":
+                  - cell "Tanzania":
+                    - generic:
+                      - generic: Tanzania
+                - row "Thailand":
+                  - cell "Thailand":
+                    - generic:
+                      - generic: Thailand
+                - row "Timor-Leste":
+                  - cell "Timor-Leste":
+                    - generic:
+                      - generic: Timor-Leste
+                - row "Togo":
+                  - cell "Togo":
+                    - generic:
+                      - generic: Togo
+                - row "Tonga":
+                  - cell "Tonga":
+                    - generic:
+                      - generic: Tonga
+                - row "Trinidad and Tobago":
+                  - cell "Trinidad and Tobago":
+                    - generic:
+                      - generic: Trinidad and Tobago
+                - row "Tunisia":
+                  - cell "Tunisia":
+                    - generic:
+                      - generic: Tunisia
+                - row "Türkiye":
+                  - cell "Türkiye":
+                    - generic:
+                      - generic: Türkiye
+                - row "Turkmenistan":
+                  - cell "Turkmenistan":
+                    - generic:
+                      - generic: Turkmenistan
+                - row "Turks and Caicos Islands":
+                  - cell "Turks and Caicos Islands":
+                    - generic:
+                      - generic: Turks and Caicos Islands
+                - row "Tuvalu":
+                  - cell "Tuvalu":
+                    - generic:
+                      - generic: Tuvalu
+                - row "Uganda":
+                  - cell "Uganda":
+                    - generic:
+                      - generic: Uganda
+                - row "Ukraine":
+                  - cell "Ukraine":
+                    - generic:
+                      - generic: Ukraine
+                - row "United Arab Emirates":
+                  - cell "United Arab Emirates":
+                    - generic:
+                      - generic: United Arab Emirates
+                - row "United Kingdom":
+                  - cell "United Kingdom":
+                    - generic:
+                      - generic: United Kingdom
+                - row "United States":
+                  - cell "United States":
+                    - generic:
+                      - generic: United States
+                - row "Uruguay":
+                  - cell "Uruguay":
+                    - generic:
+                      - generic: Uruguay
+                - row "Uzbekistan":
+                  - cell "Uzbekistan":
+                    - generic:
+                      - generic: Uzbekistan
+                - row "Vanuatu":
+                  - cell "Vanuatu":
+                    - generic:
+                      - generic: Vanuatu
+                - row "Venezuela":
+                  - cell "Venezuela":
+                    - generic:
+                      - generic: Venezuela
+                - row "Vietnam":
+                  - cell "Vietnam":
+                    - generic:
+                      - generic: Vietnam
+                - row "British Virgin Islands":
+                  - cell "British Virgin Islands":
+                    - generic:
+                      - generic: British Virgin Islands
+                - row "US Virgin Islands":
+                  - cell "US Virgin Islands":
+                    - generic:
+                      - generic: US Virgin Islands
+                - row "Yemen":
+                  - cell "Yemen":
+                    - generic:
+                      - generic: Yemen
+                - row "Zambia":
+                  - cell "Zambia":
+                    - generic:
+                      - generic: Zambia
+                - row "Zimbabwe":
+                  - cell "Zimbabwe":
+                    - generic:
+                      - generic: Zimbabwe
+                - row "Liechtenstein":
+                  - cell "Liechtenstein":
+                    - generic:
+                      - generic: Liechtenstein
+                - row "Monaco":
+                  - cell "Monaco":
+                    - generic:
+                      - generic: Monaco
+                - row "San Marino":
+                  - cell "San Marino":
+                    - generic:
+                      - generic: San Marino
+                - row "Vatican City":
+                  - cell "Vatican City":
+                    - generic:
+                      - generic: Vatican City
+                - row "Andorra":
+                  - cell "Andorra":
+                    - generic:
+                      - generic: Andorra
+                - row "Palestinian Territory":
+                  - cell "Palestinian Territory":
+                    - generic:
+                      - generic: Palestinian Territory
+                - row "Faroe Islands":
+                  - cell "Faroe Islands":
+                    - generic:
+                      - generic: Faroe Islands
+                - row "Greenland":
+                  - cell "Greenland":
+                    - generic:
+                      - generic: Greenland
+```
