@@ -20,6 +20,17 @@ import 'package:share_plus/share_plus.dart';
 
 void _noopThemeToggle() {}
 
+const Key startButtonKey = ValueKey('start-button');
+const Key compareButtonKey = ValueKey('compare-button');
+const Key detailsButtonKey = ValueKey('details-button');
+const Key addFavoriteButtonKey = ValueKey('add-favorite-button');
+const Key resetAllButtonKey = ValueKey('reset-all-button');
+const Key shareScreenshotButtonKey = ValueKey('share-screenshot-button');
+const Key exportFullPdfButtonKey = ValueKey('export-full-pdf-button');
+const Key exportDiffPdfButtonKey = ValueKey('export-diff-pdf-button');
+const Key favoritesDrawerTileKey = ValueKey('favorites-drawer-tile');
+const Key saveFavoriteDialogButtonKey = ValueKey('save-favorite-dialog-button');
+
 void main() {
   runApp(const PassportComparisonApp());
 }
@@ -436,6 +447,7 @@ class _PassportComparePageState extends State<PassportComparePage> {
             child: const Text("Cancel"),
           ),
           FilledButton(
+            key: saveFavoriteDialogButtonKey,
             onPressed: () => Navigator.pop(context, controller.text), // 傳回輸入內容
             child: const Text("Save"),
           ),
@@ -614,6 +626,7 @@ class _PassportComparePageState extends State<PassportComparePage> {
               },
             ),
             ListTile(
+              key: favoritesDrawerTileKey,
               leading: const Icon(Icons.favorite),
               title: const Text("Favorites"),
               selected: _selectedIndex == 1,
@@ -725,6 +738,7 @@ class _PassportComparePageState extends State<PassportComparePage> {
               const SizedBox(height: 10),
               if (!hasInitialized)
                 FilledButton.tonal(
+                  key: startButtonKey,
                   onPressed: isLoadingInitial ? null : _onStartComparing,
                   child: isLoadingInitial
                       ? const SizedBox(
@@ -765,6 +779,7 @@ class _PassportComparePageState extends State<PassportComparePage> {
                   runSpacing: 10,
                   children: [
                     ElevatedButton(
+                      key: compareButtonKey,
                       onPressed:
                           selectedCountryCodes
                               .take(passportCount)
@@ -774,20 +789,24 @@ class _PassportComparePageState extends State<PassportComparePage> {
                       child: const Text("Compare"),
                     ),
                     ElevatedButton(
+                      key: detailsButtonKey,
                       onPressed: isComparing ? _onShowDetails : null,
                       child: const Text("Details"),
                     ),
                     IconButton.filledTonal(
+                      key: addFavoriteButtonKey,
                       onPressed: isComparing ? _onAddToFavorite : null,
                       icon: const Icon(Icons.favorite_border),
                       tooltip: "Add to Favorite",
                     ),
                     IconButton.filledTonal(
+                      key: resetAllButtonKey,
                       onPressed: _onReset,
                       icon: const Icon(Icons.restart_alt),
                       tooltip: "Reset All",
                     ),
                     IconButton(
+                      key: shareScreenshotButtonKey,
                       onPressed: isComparing
                           ? () => _shareScreenshot(_screenshotController)
                           : null,
@@ -795,6 +814,7 @@ class _PassportComparePageState extends State<PassportComparePage> {
                       tooltip: "Share Screenshot",
                     ),
                     IconButton(
+                      key: exportFullPdfButtonKey,
                       onPressed: isComparing
                           ? () => _exportToPdf(diffOnly: false)
                           : null,
@@ -802,6 +822,7 @@ class _PassportComparePageState extends State<PassportComparePage> {
                       tooltip: "Export Full PDF",
                     ),
                     IconButton.filledTonal(
+                      key: exportDiffPdfButtonKey,
                       onPressed: isComparing
                           ? () => _exportToPdf(diffOnly: true)
                           : null,
