@@ -33213,7 +33213,7 @@ $S:2}
 B.aEe.prototype={
 $1(a){var s=B.dU().b
 s=s==null?null:s.canvasKitBaseUrl
-return(s==null?"https://www.gstatic.com/flutter-canvaskit/425cfb54d01a9472b3e81d9e76fd63a4a44cfbcb/":s)+a},
+return(s==null?"https://www.gstatic.com/flutter-canvaskit/59aa584fdf100e6c78c785d8a5b565d1de4b48ab/":s)+a},
 $S:108}
 B.Rv.prototype={
 gn(a){var s=this.a
