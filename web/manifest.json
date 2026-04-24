@@ -1,11 +1,11 @@
 {
-    "name": "passportcomparison",
-    "short_name": "passportcomparison",
+    "name": "Passport Index Toolbox",
+    "short_name": "PassportToolbox",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "A new Flutter project.",
+    "description": "Compare passport strength, visa-free access, and yearly mobility trends.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
