@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:country_flags/country_flags.dart';
 import 'package:sticky_headers/sticky_headers.dart';
 import 'package:screenshot/screenshot.dart';
+import '../models/comparison_access.dart';
 import '../models/country.dart';
 
 class ComparisonTable extends StatefulWidget {
@@ -39,11 +40,13 @@ class _ComparisonTableState extends State<ComparisonTable> {
 
     if (_showDifferencesOnly && activePassports.length > 1) {
       filtered = filtered.where((target) {
-        final statuses = activePassports.map((p) {
-          return (p.code == target.code) ||
-              (widget.visaFreeMap[p.code]?.contains(target.code) ?? false);
-        }).toSet();
-        return statuses.length > 1;
+        return hasDifferentAccess(
+          passportCodes: activePassports
+              .map((passport) => passport.code)
+              .toList(),
+          destinationCode: target.code,
+          visaFreeMap: widget.visaFreeMap,
+        );
       });
     }
 
@@ -241,9 +244,11 @@ class _ComparisonTableState extends State<ComparisonTable> {
       );
     }
 
-    final isFree =
-        (passport.code == target.code) ||
-        (widget.visaFreeMap[passport.code]?.contains(target.code) ?? false);
+    final isFree = isAccessibleDestination(
+      passportCode: passport.code,
+      destinationCode: target.code,
+      visaFreeMap: widget.visaFreeMap,
+    );
 
     final color = isFree ? const Color(0xFF2E7D5A) : const Color(0xFFB33A3A);
 

@@ -1,63 +1,105 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:passportcomparison/main.dart'; // 確保路徑正確
+import 'package:http/http.dart' as http;
+import 'package:mockito/mockito.dart';
+import 'package:passportcomparison/main.dart';
+import 'package:passportcomparison/services/api_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'api_service_test.mocks.dart';
 
 void main() {
-  testWidgets('Clicking favorite button shows rename dialog', (
+  late MockClient mockClient;
+  late ApiService service;
+
+  setUp(() {
+    SharedPreferences.setMockInitialValues({});
+    mockClient = MockClient();
+    service = ApiService(
+      client: mockClient,
+      localCountriesLoader: () async => '{"countries":[]}',
+    );
+  });
+
+  testWidgets('saving a favorite uses the custom title in page flow', (
     WidgetTester tester,
   ) async {
-    // 1. 模擬必要的環境（如果你的頁面需要 Provider 或 MaterialApp）
-    // 這裡我們直接渲染包含 _onAddToFavorite 邏輯的頁面
-    // 注意：如果你的 Page 需要傳入參數，請依照 main.dart 調整
-    await tester.pumpWidget(const MaterialApp(home: PassportComparePage()));
+    final countriesResponse = jsonEncode({
+      'countries': [
+        {
+          'code': 'TW',
+          'country': 'Taiwan',
+          'region': 'Asia',
+          'openness': 88.0,
+          'has_data': true,
+          'data': {
+            '2024': {'rank': 10, 'visa_free_count': 150, 'total': 198},
+          },
+        },
+        {
+          'code': 'JP',
+          'country': 'Japan',
+          'region': 'Asia',
+          'openness': 92.0,
+          'has_data': true,
+          'data': {
+            '2024': {'rank': 2, 'visa_free_count': 190, 'total': 198},
+          },
+        },
+      ],
+    });
 
-    // 2. 模擬「已按下 Compare」且「有選中國家」的狀態
+    when(
+      mockClient.get(Uri.parse('${ApiService.baseUrl}/countries')),
+    ).thenAnswer((_) async => http.Response(countriesResponse, 200));
+
     await tester.pumpWidget(
-      MaterialApp(
-        home: Builder(
-          builder: (context) => Scaffold(
-            body: ElevatedButton(
-              onPressed: () {
-                // 這裡模擬觸發對話框
-                showDialog(
-                  context: context,
-                  builder: (context) => AlertDialog(
-                    title: const Text("Save to Favorites"),
-                    content: const TextField(
-                      decoration: InputDecoration(
-                        labelText: "Comparison Title",
-                      ),
-                    ),
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: const Text("Cancel"),
-                      ),
-                    ],
-                  ),
-                );
-              },
-              child: const Text("Open Dialog"),
-            ),
-          ),
-        ),
-      ),
+      MaterialApp(home: PassportComparePage(apiService: service)),
     );
 
-    // 點擊觸發按鈕
-    await tester.tap(find.text("Open Dialog"));
-    await tester.pumpAndSettle(); // 等待對話框彈出動畫完成
+    await tester.tap(find.byKey(startButtonKey));
+    await tester.pumpAndSettle();
 
-    // 3. 驗證對話框是否出現
-    expect(find.byType(AlertDialog), findsOneWidget);
-    expect(find.text("Save to Favorites"), findsOneWidget);
-    expect(find.byType(TextField), findsOneWidget);
+    final countryDropdowns = find.byType(DropdownButton<String>);
 
-    // 4. 模擬點擊取消
-    await tester.tap(find.text("Cancel"));
-    await tester.pumpAndSettle(); // 等待對話框消失動畫
+    await tester.ensureVisible(countryDropdowns.first);
+    await tester.tap(countryDropdowns.first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Taiwan').last);
+    await tester.pumpAndSettle();
 
-    // 5. 驗證對話框已關閉
-    expect(find.byType(AlertDialog), findsNothing);
+    await tester.ensureVisible(countryDropdowns.at(2));
+    await tester.tap(countryDropdowns.at(2));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Japan').last);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(compareButtonKey));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(addFavoriteButtonKey));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextField), 'My Trip');
+    await tester.tap(find.byKey(saveFavoriteDialogButtonKey));
+    await tester.pumpAndSettle();
+
+    final scaffoldState = tester.state<ScaffoldState>(find.byType(Scaffold));
+    scaffoldState.openDrawer();
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(favoritesDrawerTileKey));
+    await tester.pumpAndSettle();
+
+    expect(find.text('My Trip'), findsOneWidget);
+
+    final prefs = await SharedPreferences.getInstance();
+    final storedFavorites =
+        json.decode(prefs.getString('favorites_list') ?? '[]') as List<dynamic>;
+
+    expect(storedFavorites, hasLength(1));
+    expect(storedFavorites.first['title'], 'My Trip');
   });
 }

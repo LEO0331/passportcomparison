@@ -9,6 +9,8 @@ import 'package:pdf/pdf.dart';
 import 'package:screenshot/screenshot.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'models/country.dart';
+import 'models/comparison_access.dart';
+import 'models/comparison_session.dart';
 import 'services/api_service.dart';
 import 'widgets/passport_input.dart';
 import 'widgets/comparison_table.dart';
@@ -111,11 +113,13 @@ class _PassportComparisonAppState extends State<PassportComparisonApp> {
 class PassportComparePage extends StatefulWidget {
   final ThemeMode themeMode;
   final VoidCallback onToggleTheme;
+  final ApiService? apiService;
 
   const PassportComparePage({
     super.key,
     this.themeMode = ThemeMode.dark,
     this.onToggleTheme = _noopThemeToggle,
+    this.apiService,
   });
 
   @override
@@ -123,12 +127,11 @@ class PassportComparePage extends StatefulWidget {
 }
 
 class _PassportComparePageState extends State<PassportComparePage> {
-  final ApiService _apiService = ApiService();
+  late final ApiService _apiService;
   final _logger = Logger();
   static final String currentYear = DateTime.now().year.toString();
   final ScreenshotController _screenshotController = ScreenshotController();
   // 狀態變數
-  int passportCount = 2;
   List<Country> allCountries = [];
   bool hasInitialized = false;
   bool isLoadingInitial = false;
@@ -136,11 +139,21 @@ class _PassportComparePageState extends State<PassportComparePage> {
   bool showDetails = false;
   bool isLoadingDetails = false;
   int _selectedIndex = 0; // 0: Home, 1: Favorites
-  List<Map<String, dynamic>> _favorites = []; // 儲存我的最愛清單
-  List<String?> selectedCountryCodes = List.filled(5, null);
-  List<String> selectedYears = List.filled(5, currentYear);
+  List<FavoriteSnapshot> _favorites = []; // 儲存我的最愛清單
+  ComparisonSession _session = ComparisonSession.empty(
+    defaultYear: currentYear,
+  );
 
   Map<String, Set<String>> visaFreeMap = {};
+
+  int get passportCount => _session.passportCount;
+
+  List<PassportSelection> get _visibleSelections =>
+      _session.selections.take(passportCount).toList();
+
+  List<PassportSelection> get _activeSelections => _visibleSelections
+      .where((selection) => selection.countryCode != null)
+      .toList();
 
   void _logInfo(String message) {
     if (kDebugMode) {
@@ -199,10 +212,7 @@ class _PassportComparePageState extends State<PassportComparePage> {
     final font = await PdfGoogleFonts.notoSansTCRegular();
     final boldFont = await PdfGoogleFonts.notoSansTCBold();
 
-    final activeCodes = selectedCountryCodes
-        .take(passportCount)
-        .whereType<String>()
-        .toList();
+    final activeSelections = _activeSelections;
 
     // --- 關鍵：過濾資料邏輯 ---
     // 我們只針對 Detailed Access 進行過濾
@@ -210,15 +220,26 @@ class _PassportComparePageState extends State<PassportComparePage> {
 
     for (var dest in allCountries) {
       // 取得每個選定國家對該目的地(dest)的簽證狀態 (true/false)
-      List<bool> statuses = activeCodes.map((sourceCode) {
-        return visaFreeMap[sourceCode]?.contains(dest.code) ?? false;
+      final statuses = activeSelections.map((selection) {
+        return isAccessibleDestination(
+          passportCode: selection.countryCode!,
+          destinationCode: dest.code,
+          visaFreeMap: visaFreeMap,
+        );
       }).toList();
 
       // 判斷是否「全等」：如果所有狀態都一樣，代表沒有差異
-      bool allSame = statuses.every((s) => s == statuses.first);
-
       // 如果 diffOnly 為 true，且全等，就跳過這一個國家
-      if (diffOnly && allSame) continue;
+      if (diffOnly &&
+          !hasDifferentAccess(
+            passportCodes: activeSelections
+                .map((selection) => selection.countryCode!)
+                .toList(),
+            destinationCode: dest.code,
+            visaFreeMap: visaFreeMap,
+          )) {
+        continue;
+      }
 
       // 否則，將這行加入表格
       tableData.add([
@@ -255,12 +276,14 @@ class _PassportComparePageState extends State<PassportComparePage> {
               color: PdfColors.blueGrey700,
             ),
             cellStyle: pw.TextStyle(font: font, fontSize: 10),
-            data: activeCodes.asMap().entries.map((e) {
-              final country = allCountries.firstWhere((c) => c.code == e.value);
-              final stats = country.yearlyData?[selectedYears[e.key]];
+            data: activeSelections.map((selection) {
+              final country = allCountries.firstWhere(
+                (c) => c.code == selection.countryCode,
+              );
+              final stats = country.yearlyData?[selection.year];
               return [
                 country.name,
-                selectedYears[e.key],
+                selection.year,
                 "#${stats?['rank'] ?? 'N/A'}",
                 stats?['total']?.toString() ?? '0',
               ];
@@ -285,7 +308,10 @@ class _PassportComparePageState extends State<PassportComparePage> {
             )
           else
             pw.TableHelper.fromTextArray(
-              headers: ['Destination', ...activeCodes],
+              headers: [
+                'Destination',
+                ...activeSelections.map((selection) => selection.countryCode!),
+              ],
               headerStyle: pw.TextStyle(
                 font: boldFont,
                 color: PdfColors.white,
@@ -312,7 +338,33 @@ class _PassportComparePageState extends State<PassportComparePage> {
   @override
   void initState() {
     super.initState();
+    _apiService = widget.apiService ?? ApiService();
     _loadFavorites(); // 初始化時從本地端讀取
+  }
+
+  List<FavoriteSnapshot> _decodeFavorites(String payload) {
+    try {
+      final decoded = json.decode(payload);
+      if (decoded is! List) {
+        _logWarn("Invalid favorites payload: root is not a list");
+        return [];
+      }
+
+      return decoded
+          .whereType<Map<String, dynamic>>()
+          .map(
+            (item) =>
+                FavoriteSnapshot.fromJson(item, fallbackYear: currentYear),
+          )
+          .toList();
+    } catch (e, stackTrace) {
+      _logWarn(
+        "Failed to parse favorites payload",
+        error: e,
+        stackTrace: stackTrace,
+      );
+      return [];
+    }
   }
 
   // 載入資料 (Read)
@@ -321,7 +373,7 @@ class _PassportComparePageState extends State<PassportComparePage> {
     final String? favString = prefs.getString('favorites_list');
     if (favString != null) {
       setState(() {
-        _favorites = List<Map<String, dynamic>>.from(json.decode(favString));
+        _favorites = _decodeFavorites(favString);
       });
       _logInfo("Loaded ${_favorites.length} favorites from disk.");
     }
@@ -330,7 +382,9 @@ class _PassportComparePageState extends State<PassportComparePage> {
   // 儲存資料 (Save)
   Future<void> _saveFavorites() async {
     final prefs = await SharedPreferences.getInstance();
-    final String favString = json.encode(_favorites);
+    final String favString = json.encode(
+      _favorites.map((favorite) => favorite.toJson()).toList(),
+    );
     await prefs.setString('favorites_list', favString);
   }
 
@@ -341,24 +395,18 @@ class _PassportComparePageState extends State<PassportComparePage> {
     _saveFavorites(); // 刪除後更新本地端
   }
 
-  Future<void> _loadFavoriteToHome(Map<String, dynamic> item) async {
+  Future<void> _loadFavoriteToHome(FavoriteSnapshot item) async {
     setState(() {
-      selectedCountryCodes = List<String?>.from(item['codes'])
-        ..addAll(List.filled(5 - (item['codes'] as List).length, null));
-      selectedYears = List<String>.from(item['years'])
-        ..addAll(List.filled(5 - (item['years'] as List).length, currentYear));
-      passportCount = item['count'] ?? 1;
+      _session = ComparisonSession.fromFavoriteSnapshot(item);
       isComparing = true;
       showDetails = true;
       _selectedIndex = 0;
     });
 
-    List<String> codes = List<String>.from(item['codes']);
-    for (var code in codes) {
+    for (final code in item.activeCodes) {
       if (!visaFreeMap.containsKey(code)) {
-        var detailCodes = await _apiService.fetchVisaFreeCodes(code);
+        final detailCodes = await _apiService.fetchVisaFreeCodes(code);
         setState(() {
-          // 假設你的全域變數 visaFreeMap 結構是 Map<String, Set<String>>
           visaFreeMap[code] = detailCodes;
         });
       }
@@ -398,12 +446,10 @@ class _PassportComparePageState extends State<PassportComparePage> {
     if (!mounted || confirm != true) return;
 
     setState(() {
-      selectedCountryCodes = List.filled(5, null);
-      selectedYears = List.filled(5, currentYear);
+      _session = ComparisonSession.empty(defaultYear: currentYear);
       isComparing = false;
       showDetails = false;
       visaFreeMap.clear();
-      passportCount = 2;
       hasInitialized = false; // 回到 Start 畫面
     });
     _logWarn("User confirmed state reset.");
@@ -458,7 +504,7 @@ class _PassportComparePageState extends State<PassportComparePage> {
 
   Future<void> _onAddToFavorite() async {
     // 防呆：如果還沒按下 Compare 或沒有選中任何國家，則不執行
-    if (!isComparing || selectedCountryCodes.where((c) => c != null).isEmpty) {
+    if (!isComparing || !_session.hasAnySelected) {
       ScaffoldMessenger.of(context).clearSnackBars();
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -468,23 +514,25 @@ class _PassportComparePageState extends State<PassportComparePage> {
       return;
     }
     try {
-      List<String> names = selectedCountryCodes
-          .take(passportCount)
-          .map((code) => allCountries.firstWhere((c) => c.code == code).name)
+      final names = _activeSelections
+          .map(
+            (selection) => allCountries
+                .firstWhere((c) => c.code == selection.countryCode)
+                .name,
+          )
           .toList();
-      String defaultTitle = names.join(' vs ');
-      String? customTitle = await _showRenameDialog(defaultTitle);
+      final defaultTitle = names.join(' vs ');
+      final customTitle = await _showRenameDialog(defaultTitle);
 
       if (!mounted || customTitle == null) return; // 2. 建立一筆新的最愛紀錄
 
       setState(() {
-        _favorites.add({
-          'title': names.join(' vs '),
-          'date': DateTime.now().toString().substring(0, 16),
-          'codes': List.from(selectedCountryCodes),
-          'years': List.from(selectedYears),
-          'count': passportCount,
-        });
+        _favorites.add(
+          _session.toFavoriteSnapshot(
+            title: customTitle,
+            date: DateTime.now().toString().substring(0, 16),
+          ),
+        );
       });
       await _saveFavorites();
 
@@ -519,10 +567,7 @@ class _PassportComparePageState extends State<PassportComparePage> {
   // 2. 核心邏輯：按下 Details 後獲取所有選中護照的 /visa-single 數據
   Future<void> _onShowDetails() async {
     // 1. 檢查是否有任何選中的國家代碼
-    final activeCodes = selectedCountryCodes
-        .take(passportCount)
-        .whereType<String>()
-        .toList();
+    final activeCodes = _session.activeCodes;
 
     if (activeCodes.isEmpty) return;
 
@@ -722,7 +767,11 @@ class _PassportComparePageState extends State<PassportComparePage> {
                 selected: {passportCount},
                 onSelectionChanged: !hasInitialized
                     ? (Set<int> newSelection) {
-                        setState(() => passportCount = newSelection.first);
+                        setState(() {
+                          _session = _session.updatePassportCount(
+                            newSelection.first,
+                          );
+                        });
                       }
                     : null,
                 style: ButtonStyle(
@@ -756,17 +805,17 @@ class _PassportComparePageState extends State<PassportComparePage> {
                   (i) => PassportInputRow(
                     index: i,
                     countries: allCountries,
-                    selectedCode: selectedCountryCodes[i],
-                    selectedYear: selectedYears[i],
+                    selectedCode: _session.selections[i].countryCode,
+                    selectedYear: _session.selections[i].year,
                     onCountryChanged: (val) {
                       setState(() {
-                        selectedCountryCodes[i] = val;
+                        _session = _session.updateCountry(i, val);
                         showDetails = false;
                       });
                     },
                     onYearChanged: (val) {
                       setState(() {
-                        selectedYears[i] = val!;
+                        _session = _session.updateYear(i, val!);
                         showDetails = false;
                       });
                     },
@@ -780,12 +829,9 @@ class _PassportComparePageState extends State<PassportComparePage> {
                   children: [
                     ElevatedButton(
                       key: compareButtonKey,
-                      onPressed:
-                          selectedCountryCodes
-                              .take(passportCount)
-                              .contains(null)
-                          ? null
-                          : () => setState(() => isComparing = true),
+                      onPressed: _session.hasAllSelected
+                          ? () => setState(() => isComparing = true)
+                          : null,
                       child: const Text("Compare"),
                     ),
                     ElevatedButton(
@@ -895,15 +941,9 @@ class _PassportComparePageState extends State<PassportComparePage> {
       itemCount: _favorites.length,
       itemBuilder: (context, index) {
         final item = _favorites[index];
-        final String title =
-            (item['title']?.toString()) ?? "Untitled Comparison";
-        final String date = (item['date']?.toString()) ?? "Unknown Date";
-        final List<String> activeCodes =
-            (item['codes'] as List?)
-                ?.map((e) => e?.toString() ?? "")
-                .where((e) => e.isNotEmpty)
-                .toList() ??
-            [];
+        final title = item.title;
+        final date = item.date;
+        final activeCodes = item.activeCodes;
 
         return Card(
           margin: const EdgeInsets.only(bottom: 14),
@@ -998,7 +1038,8 @@ class _PassportComparePageState extends State<PassportComparePage> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceEvenly,
         children: List.generate(passportCount, (i) {
-          final code = selectedCountryCodes[i];
+          final selection = _session.selections[i];
+          final code = selection.countryCode;
           if (code == null) {
             return const Expanded(
               child: Center(child: Text("Select Passport")),
@@ -1006,7 +1047,7 @@ class _PassportComparePageState extends State<PassportComparePage> {
           }
 
           final country = allCountries.firstWhere((c) => c.code == code);
-          final selectedYear = selectedYears[i];
+          final selectedYear = selection.year;
           final Map<String, dynamic>? dataMap = country.yearlyData;
           final yearData = (country.hasData && dataMap != null)
               ? dataMap[selectedYear]
@@ -1124,10 +1165,7 @@ class _PassportComparePageState extends State<PassportComparePage> {
       );
     }
     return ComparisonTable(
-      selectedCodes: selectedCountryCodes
-          .take(passportCount)
-          .whereType<String>()
-          .toList(),
+      selectedCodes: _session.activeCodes,
       allCountries: allCountries,
       visaFreeMap: visaFreeMap,
     );
@@ -1136,35 +1174,30 @@ class _PassportComparePageState extends State<PassportComparePage> {
 
 Widget _buildFavoriteSummaryPreview(
   BuildContext context,
-  Map<String, dynamic> item,
+  FavoriteSnapshot item,
   List<Country> allCountries,
 ) {
   final theme = Theme.of(context);
-  final List<String> codes = (item['codes'] as List? ?? [])
-      .where((e) => e != null)
-      .map((e) => e.toString())
-      .where((e) => e.isNotEmpty)
-      .toList();
-  final List<String> years = (item['years'] as List? ?? [])
-      .where((e) => e != null)
-      .map((e) => e.toString())
-      .toList();
+  final activeSelections = item.selections
+      .take(item.count)
+      .where(
+        (selection) =>
+            selection.countryCode != null && selection.countryCode!.isNotEmpty,
+      );
 
-  if (codes.isEmpty) return const SizedBox.shrink(); // 如果沒資料就隱藏
+  if (activeSelections.isEmpty) return const SizedBox.shrink(); // 如果沒資料就隱藏
 
   return Row(
     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-    children: codes.asMap().entries.map((entry) {
-      final int index = entry.key;
-      final String rawCode = entry.value;
-      final String displayCode = rawCode.trim().toUpperCase();
+    children: activeSelections.map((selection) {
+      final displayCode = selection.countryCode!.trim().toUpperCase();
       Country? country;
       try {
         country = allCountries.firstWhere((c) => c.code == displayCode);
       } catch (_) {
         country = null;
       }
-      final year = index < years.length ? years[index] : "";
+      final year = selection.year;
       final yearDataMap = country?.yearlyData;
       final yearStats = (country?.hasData ?? false) && yearDataMap != null
           ? yearDataMap[year]
