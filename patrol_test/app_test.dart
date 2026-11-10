@@ -1,77 +1,44 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:patrol/patrol.dart';
 import 'package:passportcomparison/main.dart' as app;
+import 'package:patrol/patrol.dart';
 
 void main() {
-  patrolTest('chrome e2e user flow', ($) async {
-    Future<void> tapIfPresent(Key key) async {
-      try {
-        await $(find.byKey(key)).tap();
-        await $.pumpAndSettle();
-      } catch (_) {
-        // Browser share/print hooks may vary across CI/web runners.
-      }
-    }
-
+  patrolTest('compare two passports and reopen a saved preset', ($) async {
     app.main();
     await $.pumpAndSettle();
 
-    // Flutter web may expose only the accessibility gate initially.
-    try {
-      await $('Enable accessibility').tap();
-    } catch (_) {}
+    expect(find.text('Passport A'), findsOneWidget);
+    expect(find.text('Passport B'), findsOneWidget);
+    expect(find.text('Passport C'), findsNothing);
 
-    // Some builds show a one-time dismiss button after opening semantics.
-    try {
-      await $('Dismiss').tap();
-    } catch (_) {}
+    Future<void> selectPassport(
+      String slot,
+      String query,
+      String country,
+    ) async {
+      await $(find.text('Passport $slot')).tap();
+      final search = find.widgetWithText(TextField, 'Search passports');
+      await $.tester.enterText(search, query);
+      await $.pumpAndSettle();
+      await $(find.text(country)).tap();
+    }
 
-    await $('2').tap();
-    await $(find.byKey(app.startButtonKey)).tap();
-
-    await $(find.bySemanticsLabel('Passport 1')).tap();
-    await $(find.bySemanticsLabel('Afghanistan')).tap();
-
-    await $(find.bySemanticsLabel('Passport 2')).tap();
-    await $(find.bySemanticsLabel('Albania')).tap();
-
-    await $(find.byKey(app.compareButtonKey)).tap();
-    await $(find.byKey(app.detailsButtonKey)).waitUntilVisible();
-
-    // Explicitly exercise key-based action icons in compare mode.
-    await tapIfPresent(app.shareScreenshotButtonKey);
-    await tapIfPresent(app.exportFullPdfButtonKey);
-    await tapIfPresent(app.exportDiffPdfButtonKey);
-
-    await $(find.byKey(app.detailsButtonKey)).tap();
-    await $('Detailed Access Comparison').scrollTo();
-    await $('Detailed Access Comparison').waitUntilVisible();
-
-    await $('How many passports to compare today? (Max 5)').scrollTo();
-    await $(find.byKey(app.addFavoriteButtonKey)).tap();
-    await $.pumpAndSettle();
-    await $(find.byKey(app.saveFavoriteDialogButtonKey)).tap();
-    await $.pumpAndSettle();
-
-    await $.tester.tap(
-      find.bySemanticsLabel('Open navigation menu', skipOffstage: false).first,
-      warnIfMissed: false,
+    await selectPassport('A', 'Taiw', 'Taiwan');
+    await selectPassport('B', 'Japa', 'Japan');
+    await $(
+      find.textContaining('Shared visa-free access', findRichText: true),
+    ).scrollTo();
+    await $(find.text('Save preset')).tap();
+    await $.tester.enterText(
+      find.byType(TextField).last,
+      'E2E Taiwan and Japan',
     );
-    await $.pumpAndSettle();
-    await $(find.byKey(app.favoritesDrawerTileKey)).tap();
-    await $.pumpAndSettle();
+    await $(find.text('Save')).tap();
 
-    await $('Afghanistan vs Albania').waitUntilVisible();
-
-    // Exercise reset key without mutating state.
-    await $(find.bySemanticsLabel('Open navigation menu')).tap();
-    await $.pumpAndSettle();
-    await $(find.bySemanticsLabel('Home')).tap();
-    await $.pumpAndSettle();
-    await $(find.byKey(app.resetAllButtonKey)).tap();
-    await $.pumpAndSettle();
-    await $('Cancel').tap();
-    await $.pumpAndSettle();
+    await $(find.byTooltip('Saved presets')).tap();
+    await $(find.text('E2E Taiwan and Japan')).tap();
+    await $('Passport A: Taiwan').waitUntilVisible();
+    await $('Passport B: Japan').waitUntilVisible();
   });
 }

@@ -3,7 +3,7 @@ name: Deploy Flutter Web
 on:
   push:
     branches:
-      - main  # 確保你的主分支名稱是 main
+      - main
 
 permissions:
   contents: write
@@ -17,14 +17,19 @@ jobs:
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          # 解決 SDK ^3.11.0 要求：使用最新穩定版或開發版
-          channel: 'stable' 
+          flutter-version: '3.47.2'
+          channel: stable
 
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Verify Flutter app
+        run: |
+          flutter analyze --no-pub
+          flutter test --no-pub
+
       - name: Build Web
-        run: flutter build web --release --base-href "/passportcomparison/"
+        run: flutter build web --release --base-href "/passportcomparison/" --no-web-resources-cdn
 
       - name: Generate AssetManifest.json compatibility file
         run: |
