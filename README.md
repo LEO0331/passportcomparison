@@ -43,7 +43,9 @@ flutter test
 flutter build web --release --base-href "/passportcomparison/" --no-web-resources-cdn
 ```
 
-The build flag bundles Flutter web renderer resources with the app. Publish the contents of `build/web/` at `/passportcomparison/`. The repository's Pages workflow builds and publishes on pushes to `main` using the `gh-pages` branch. For local release checks, serve the build at the same subpath and include it when opening a shared URL.
+The build flag bundles Flutter web renderer resources with the app. For local release checks, serve `build/web/` at `/passportcomparison/` and include that subpath when opening a shared URL.
+
+In **Settings → Pages → Build and deployment**, set **Source** to **GitHub Actions**. The **Deploy Flutter Web** workflow builds and publishes on pushes to `main`. To republish the current build, run the workflow manually from the Actions tab with `main` selected.
 
 ## Browser checks
 
