@@ -72,12 +72,12 @@ async function main() {
     await selectPassport(page, 'B', 'Japa', 'Japan');
     await page.getByRole('heading', { name: 'Travel access summary' }).waitFor();
 
-    const destinationSearch = page.getByRole('textbox', { name: 'Search destinations' });
-    await destinationSearch.fill('Canada');
-    await page.getByRole('button', { name: 'Canada', exact: true }).click();
+    await page.getByRole('heading', { name: 'Destination comparison' }).waitFor();
+    await page.getByRole('textbox', { name: 'Search destinations' }).waitFor();
+    await page.getByRole('button', { name: 'Afghanistan', exact: true }).click();
     await page.getByRole('button', { name: 'Close', exact: true }).click();
-    await destinationSearch.fill('');
     await page.getByRole('button', { name: 'Copy comparison link' }).click();
+    await page.waitForFunction(async () => (await navigator.clipboard.readText()).includes('passports='));
     const sharedUrl = new URL(await page.evaluate(() => navigator.clipboard.readText()));
     assert.equal(sharedUrl.origin, appUrl.origin);
     assert.equal(sharedUrl.pathname, appUrl.pathname);
@@ -101,6 +101,7 @@ async function main() {
     await page.getByRole('button', { name: 'Save preset' }).click();
     await page.getByRole('textbox', { name: 'Comparison title' }).fill(presetTitle);
     await page.getByRole('button', { name: 'Save', exact: true }).click();
+    await page.getByText('Comparison preset saved.', { exact: true }).last().waitFor();
     await page.reload();
     await enableSemantics(page);
     await page.getByRole('button', { name: 'Saved presets' }).click();
@@ -118,7 +119,7 @@ async function main() {
     assert.deepEqual(providerRequests, []);
     console.log(`Browser flow passed at desktop and mobile widths: ${appUrl.href}`);
   } catch (error) {
-    if (page) console.error(await page.locator('body').ariaSnapshot());
+    if (page) console.error((await page.locator('body').ariaSnapshot()).slice(0, 4000));
     throw error;
   } finally {
     await browser.close();

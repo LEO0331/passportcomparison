@@ -50,11 +50,19 @@ The build flag bundles Flutter web renderer resources with the app. Publish the 
 The Playwright flow exercises the release build at the GitHub Pages base path. Install the test-only dependency in the ignored Flutter tooling directory, then install Chromium.
 
 ```sh
-npm install --prefix .dart_tool/browser-checks --no-audit --no-fund playwright
+npm install --prefix .dart_tool/browser-checks --no-audit --no-fund playwright@1.65.0
 npx --prefix .dart_tool/browser-checks playwright install chromium
 ```
 
-Copy or link `build/web/` to a `passportcomparison/` subdirectory in your local server root. Serve that root on port 8787, then run the checks.
+Serve the build at the repository's Pages subpath. For example, from a POSIX shell:
+
+```sh
+mkdir -p .dart_tool/browser-checks/site/passportcomparison
+cp -R build/web/. .dart_tool/browser-checks/site/passportcomparison/
+python -m http.server 8787 --bind 127.0.0.1 --directory .dart_tool/browser-checks/site
+```
+
+Run the check in a second terminal. It blocks external requests and verifies the comparison at desktop and mobile widths.
 
 ```sh
 node scripts/e2e/playwright_user_flow.cjs http://127.0.0.1:8787/passportcomparison/
