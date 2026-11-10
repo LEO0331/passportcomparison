@@ -1,0 +1,96 @@
+name: Propose a travel requirements refresh
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '24 4 1 * *'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: travel-requirements-refresh
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    if: github.ref_name == github.event.repository.default_branch
+    runs-on: ubuntu-latest
+    outputs:
+      changed: ${{ steps.snapshot.outputs.changed }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install validation dependencies
+        run: python -m pip install -r scripts/data/requirements.txt
+      - name: Test importer
+        run: python -m unittest discover -s scripts/data -p 'test_*.py'
+      - name: Download and validate canonical revision
+        id: snapshot
+        run: |
+          git clone --depth 1 https://github.com/travel-requirements/entry-requirements.git "$RUNNER_TEMP/upstream"
+          python scripts/data/import_travel_requirements.py --source "$RUNNER_TEMP/upstream" --report "$RUNNER_TEMP/report.md"
+          python scripts/data/import_travel_requirements.py --validate-only
+          cat "$RUNNER_TEMP/report.md" >> "$GITHUB_STEP_SUMMARY"
+          if ! git diff --quiet -- assets/data/passport_requirements.json; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            mkdir "$RUNNER_TEMP/candidate"
+            cp assets/data/passport_requirements.json "$RUNNER_TEMP/report.md" "$RUNNER_TEMP/candidate/"
+          fi
+      - uses: subosito/flutter-action@v2
+        if: steps.snapshot.outputs.changed == 'true'
+        with:
+          channel: stable
+          flutter-version: '3.47.2'
+      - name: Check Flutter with the candidate snapshot
+        if: steps.snapshot.outputs.changed == 'true'
+        run: |
+          flutter pub get
+          flutter analyze
+          flutter test
+      - uses: actions/upload-artifact@v4
+        if: steps.snapshot.outputs.changed == 'true'
+        with:
+          name: validated-travel-requirements
+          path: ${{ runner.temp }}/candidate/
+          if-no-files-found: error
+          retention-days: 7
+
+  propose:
+    needs: validate
+    if: needs.validate.outputs.changed == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      BASE_BRANCH: ${{ github.event.repository.default_branch }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: validated-travel-requirements
+          path: ${{ runner.temp }}/candidate
+      - name: Open a review pull request
+        run: |
+          snapshot="$RUNNER_TEMP/candidate/passport_requirements.json"
+          revision="$(jq -er '.metadata.commit | select(test("^[a-f0-9]{40}$"))' "$snapshot")"
+          branch="codex/refresh-travel-requirements-$revision"
+          existing="$(gh pr list --head "$branch" --base "$BASE_BRANCH" --state open --json url --jq '.[0].url // empty')"
+          if [[ -n "$existing" ]]; then
+            echo "Existing proposal: $existing" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          git switch -c "$branch"
+          cp "$snapshot" assets/data/passport_requirements.json
+          git add -- assets/data/passport_requirements.json
+          git -c user.name=github-actions[bot] -c user.email=41898282+github-actions[bot]@users.noreply.github.com commit -m "Refresh TravelRequirements.info snapshot"
+          git push origin "HEAD:refs/heads/$branch"
+          gh pr create --head "$branch" --base "$BASE_BRANCH" \
+            --title "Refresh TravelRequirements.info snapshot" \
+            --body-file "$RUNNER_TEMP/candidate/report.md"

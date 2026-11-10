@@ -1,94 +1,73 @@
-# 🌍 Passport Index Toolbox
+# Passport Comparison
 
-![Deploy Status](https://github.com/leo0331/passportcomparison/actions/workflows/deploy.yml/badge.svg)
-![Coverage](https://img.shields.io/badge/coverage-90%25-brightgreen)
+Compare entry requirements for two to five passports. See where travelers share visa-free access, where requirements differ, and where the data is unconfirmed.
 
-A simple passport strength comparison tool built with Flutter. It fetches data via the Passport Index API, supporting comparisons of up to 5 passports, rank tracking, favorite snapshots, and PDF report exports.
+[Open Passport Comparison](https://leo0331.github.io/passportcomparison/)
 
-## 🎯 Purpose 
+## Compare and share
 
-The goal of this project is to solve a simple need: **"a simple and straight comparison among passports."** 
-This toolbox focuses on a clean, fast, and intuitive interface to compare visa-free access across different countries.
+1. Search for and select two passports. Use **Add Passport** to compare up to five.
+2. Read the summary, then search or filter by destination, region, or type of difference. Open a destination to see the requirements and supporting information for each passport.
+3. Save a comparison preset on this device, share a comparison link, or export a full or differences-only PDF. Screenshot sharing is available on supported platforms.
 
-## ✨ Core Features
+A saved preset keeps your passport selections and uses the bundled dataset when reopened. A PDF records the comparison and dataset version used at the time of export.
 
-*   **Multi-Country Sync Comparison**: Compare 1 to 5 passports simultaneously to visualize visa access differences side-by-side.
-*   **Historical Data Tracking**: Toggle between different years (from 2006 to present) to observe trends in passport power evolution.
-*   **Smart Favorites System**:
-    *   **Custom Titles**: Rename comparison sets when saving to your favorites.
-    *   **Snapshot Technology**: Automatically encapsulates current rank, region, and visa-free totals during save. This ensures accurate previews even if the API data changes or the device is offline.
-*   **Export & Share**:
-    *   **Full PDF Reports**: Generate professional documents containing summaries and detailed access lists.
-    *   **Diff Only Export**: Specifically filter out countries with identical visa treatments, highlighting only the differences to improve report readability.
-    *   **Full-Screen Screenshots**: One-tap capture and sharing of comparison results via the native system share sheet.
+## Data and methodology
 
-## 🛠️ Tech Stack
+The app reads a validated snapshot of the TravelRequirements.info Entry Requirements Dataset bundled with the Flutter app. Comparisons run locally after the asset loads. The snapshot includes current entry requirements and provenance. **About the Data** shows the version, update date, coverage, and verification information available in the snapshot.
 
-*   **Framework**: [Flutter](https://flutter.dev) (Channel Stable)
-*   **Data Storage**: [SharedPreferences](https://pub.dev) (For local persistence of favorites)
-*   **PDF Generation**: [pdf](https://pub.dev) & [printing](https://pub.dev) (Integrated Google Fonts to resolve CJK font missing issues)
-*   **Sharing**: [screenshot](https://pub.dev) & [share_plus](https://pub.dev)
+TravelRequirements.info — Entry Requirements Dataset, AXG Sp. z o.o., https://travelrequirements.info/data/ ([CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)). The bundled dataset is adapted for this app.
 
-## 🚀 Quick Start
+Entry requirements can change. Check the destination's official sources before traveling.
 
-### Prerequisites
-*   Flutter SDK: `^3.0.0`
-*   Dart SDK: `^3.0.0`
+- [Data methodology and updates](docs/data-methodology.md)
+- [Architecture](docs/system-design-review.en.md)
+- [Architecture in Traditional Chinese](docs/system-design-review.zh-TW.md)
 
-### Installation Steps
-1. Clone the repository:
-   ```bash
-   git clone https://github.com
+## Development and deployment
 
-2. Install dependencies:
-    ```bash
-    flutter pub get
+Use Flutter stable with Dart 3.11 or later.
 
-3. Run the app (Web/Chrome):
-    ```bash
-    flutter run -d chrome
+```sh
+git clone https://github.com/LEO0331/passportcomparison.git
+cd passportcomparison
+flutter pub get
+flutter run -d chrome
+```
 
-## 🧪 End-to-End (Playwright CLI)
+Run the local checks and build with the GitHub Pages base path.
 
-This repository includes a real browser E2E flow script that covers:
-- home load
-- two-passport compare flow
-- details/search interaction
-- add-to-favorites
-- favorites persistence check
+```sh
+flutter analyze
+flutter test
+flutter build web --release --base-href "/passportcomparison/" --no-web-resources-cdn
+```
 
-### Run locally
+The build flag bundles Flutter web renderer resources with the app. Publish the contents of `build/web/` at `/passportcomparison/`. The repository's Pages workflow builds and publishes on pushes to `main` using the `gh-pages` branch. For local release checks, serve the build at the same subpath and include it when opening a shared URL.
 
-1. Build web app:
-   ```bash
-   flutter build web --release
-   ```
-2. Serve built app:
-   ```bash
-   cd build/web
-   python3 -m http.server 8787
-   ```
-3. In another terminal, run E2E flow:
-   ```bash
-   ./scripts/e2e/playwright_user_flow.sh http://127.0.0.1:8787
-   ```
+## Browser checks
 
-## 📺 Demonstration
+The Playwright flow exercises the release build at the GitHub Pages base path. Install the test-only dependency in the ignored Flutter tooling directory, then install Chromium.
 
-### 1. Comparison Flow
-Select up to 5 countries and specific years. The tool instantly fetches the Rank and Visa-Free Score. Click **"Details"** to see a full country-by-country access breakdown.
-> ![Comparison Demo1](assets/screenshots/demo1.png)
-> ![Comparison Demo2](assets/screenshots/demo2.png)
+```sh
+npm install --prefix .dart_tool/browser-checks --no-audit --no-fund playwright@1.65.0
+npx --prefix .dart_tool/browser-checks playwright install chromium
+```
 
-### 2. Favorites & Snapshots
-Save frequent comparisons with custom names. 
-> ![Favorites Demo1](assets/screenshots/demo3.png)
+Serve the build at the repository's Pages subpath. For example, from a POSIX shell:
 
-### 3. Professional PDF Export (Full vs. Diff Only)
-Choose between a **Full Report** or a **Difference-Only Report**. The "Diff Only" mode is perfect for travelers who only want to know which destinations require a visa for one passport but not the other.
-[View Full Report Sample (PDF)](assets/screenshots/pdf1.pdf)
-[View Difference-Only Report Sample (PDF)](assets/screenshots/pdf2.pdf)
+```sh
+mkdir -p .dart_tool/browser-checks/site/passportcomparison
+cp -R build/web/. .dart_tool/browser-checks/site/passportcomparison/
+python -m http.server 8787 --bind 127.0.0.1 --directory .dart_tool/browser-checks/site
+```
 
-### 🔗 Live Demo
-[Check out the App here!](https://leo0331.github.io/passportcomparison/)
-![test coverage](assets/screenshots/demo5.png)
+Run the check in a second terminal. It blocks external requests and verifies the comparison at desktop and mobile widths.
+
+```sh
+node scripts/e2e/playwright_user_flow.cjs http://127.0.0.1:8787/passportcomparison/
+```
+
+## Rollback
+
+To roll back a released change, revert its commit on a branch and review the revert through a pull request. For a data-only rollback, restore the last validated data assets together so their metadata and requirements stay in sync.

@@ -1,11 +1,11 @@
 {
-    "name": "Passport Index Toolbox",
-    "short_name": "PassportToolbox",
+    "name": "Passport Comparison",
+    "short_name": "Passport Compare",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "Compare passport strength, visa-free access, and yearly mobility trends.",
+    "description": "Compare entry requirements for two to five passports, find visa-free differences, and export shareable reports.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
